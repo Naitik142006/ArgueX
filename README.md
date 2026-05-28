@@ -30,9 +30,13 @@ Then open the local address shown by Vite, usually `http://localhost:5173`.
 
 ## Phase 2 — Backend Foundation
 
+
+
 A new backend is added in the server/ folder to support authentication, debate creation, and message history.
 
 ### Backend tech stack
+
+
 
 - Node.js
 - Express.js
