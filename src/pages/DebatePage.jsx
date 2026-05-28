@@ -1,15 +1,46 @@
 import { useState } from 'react';
+import { createDebateRequest, addDebateMessageRequest } from '../services/debateService.js';
 
 function DebatePage() {
+  const [topic, setTopic] = useState('AI in education');
   const [messages, setMessages] = useState([
     { id: 1, sender: 'AI', text: 'Choose a topic and begin your opening argument.' },
   ]);
   const [draft, setDraft] = useState('');
+  const [error, setError] = useState('');
+  const [status, setStatus] = useState('');
+  const [debateId, setDebateId] = useState(null);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!draft.trim()) return;
-    setMessages((prev) => [...prev, { id: prev.length + 1, sender: 'You', text: draft }]);
-    setDraft('');
+
+    const token = window.localStorage.getItem('arguexToken');
+    if (!token) {
+      setError('You must be logged in to send a message.');
+      return;
+    }
+
+    try {
+      setError('');
+      setStatus('Sending message...');
+
+      if (!debateId) {
+        const created = await createDebateRequest(topic, token);
+        const updated = await addDebateMessageRequest(created._id, draft, token);
+        setDebateId(created._id);
+        setMessages(updated.messages.map((message, index) => ({ ...message, id: index + 1 })));
+        setStatus('Debate started and message saved.');
+      } else {
+        const updated = await addDebateMessageRequest(debateId, draft, token);
+        setMessages(updated.messages.map((message, index) => ({ ...message, id: index + 1 })));
+        setStatus('Message sent to debate.');
+      }
+
+      setDraft('');
+    } catch (err) {
+      setError(err.message);
+      setStatus('');
+    }
   };
 
   return (
@@ -18,12 +49,25 @@ function DebatePage() {
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-indigo-300">Debate room</p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">Topic: AI in education</h1>
+            <h1 className="mt-3 text-3xl font-semibold text-white">Topic: {topic}</h1>
             <p className="text-slate-400">Opponent: ArgueX AI coach</p>
           </div>
         </div>
 
         <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+            <input
+              value={topic}
+              onChange={(event) => setTopic(event.target.value)}
+              placeholder="Choose a topic for your debate"
+              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+            />
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/90 px-4 py-3 text-sm text-slate-300">
+              Debate ID: {debateId ?? 'not started'}
+            </div>
+          </div>
+          {error && <div className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div>}
+          {status && <div className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{status}</div>}
           <div className="max-h-[420px] space-y-3 overflow-y-auto rounded-3xl border border-slate-800 bg-slate-950/90 p-5">
             {messages.map((message) => (
               <div

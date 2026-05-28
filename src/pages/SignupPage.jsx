@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import InputField from '../components/Form/InputField.jsx';
+import { signupRequest } from '../services/authService.js';
 
 function SignupPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' });
@@ -15,7 +16,7 @@ function SignupPage() {
     setMessage('');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!form.username || !form.email || !form.password || !form.confirmPassword) {
       setError('Please fill in every field.');
@@ -27,10 +28,21 @@ function SignupPage() {
       return;
     }
 
-    setMessage('Signup looks good! Redirecting to dashboard...');
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1200);
+    try {
+      const data = await signupRequest({
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      });
+
+      window.localStorage.setItem('arguexToken', data.token);
+      setMessage('Signup successful! Redirecting to dashboard...');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
