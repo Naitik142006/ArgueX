@@ -1,27 +1,53 @@
-import { API_URL, authHeader, handleResponse } from './api.js';
+import { debateAPI, messageAPI } from './api.js';
 
-export const createDebateRequest = async (topic, token) => {
-  const response = await fetch(`${API_URL}/api/debates`, {
-    method: 'POST',
-    headers: authHeader(token),
-    body: JSON.stringify({ topic }),
-  });
-  return handleResponse(response);
+/**
+ * Create Debate Request
+ * 
+ * Calls the backend to create a new debate
+ * 
+ * @param {string} title - Debate title
+ * @param {string} description - Debate description
+ * @returns {Promise<object>} - Created debate
+ */
+export const createDebateRequest = async (title, description) => {
+  try {
+    return await debateAPI.create(title, description);
+  } catch (error) {
+    console.error('Create debate failed:', error);
+    throw error;
+  }
 };
 
-export const addDebateMessageRequest = async (debateId, text, token) => {
-  const response = await fetch(`${API_URL}/api/debates/${debateId}`, {
-    method: 'POST',
-    headers: authHeader(token),
-    body: JSON.stringify({ text }),
-  });
-  return handleResponse(response);
+/**
+ * Add Debate Message Request
+ * 
+ * Calls the backend to add a message to a debate
+ * 
+ * @param {string} debateId - Debate ID
+ * @param {string} text - Message text
+ * @returns {Promise<object>} - Updated debate
+ */
+export const addDebateMessageRequest = async (debateId, text) => {
+  try {
+    return await messageAPI.send(debateId, text);
+  } catch (error) {
+    console.error('Add message failed:', error);
+    throw error;
+  }
 };
 
-export const fetchUserDebates = async (token) => {
-  const response = await fetch(`${API_URL}/api/debates`, {
-    method: 'GET',
-    headers: authHeader(token),
-  });
-  return handleResponse(response);
+/**
+ * Fetch User Debates
+ * 
+ * Calls the backend to get all debates for current user
+ * 
+ * @returns {Promise<array>} - User's debates
+ */
+export const fetchUserDebates = async () => {
+  try {
+    return await debateAPI.getAll();
+  } catch (error) {
+    console.error('Fetch debates failed:', error);
+    throw error;
+  }
 };
