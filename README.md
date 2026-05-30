@@ -206,3 +206,78 @@ Now that ArgueX has robust authentication, next phases will explore:
 2. **WebSocket Integration** — Real-time debate room synchronization for multi-user experiences.
 3. **Advanced Profile Customization** — Storing and displaying user stats, debate records, and ratings.
 
+
+## Phase 4 — AI Debate Coach Integration
+
+🧠 **What’s new?** The app now includes an AI‑powered debate coach that evaluates arguments in real‑time, provides structured feedback, and suggests improvements. This brings a fully‑interactive, intelligent tutoring experience to ArgueX.
+
+### New Backend Components
+- `server/models/Debate.js` – expanded schema with `aiPersona`, `status`, and `analysis` fields to store AI‑generated insights.
+- `server/services/aiService.js` – thin wrapper around `@google/generative‑ai` that formats prompts, calls the Gemini model, and enforces JSON responses.
+- `server/controllers/aiController.js` – route handlers for:
+  - `POST /api/ai/evaluate` – send debate context, receive structured analysis (logic, evidence, persuasion, fallacies, feedback).
+- `server/routes/aiRoutes.js` – registers the AI endpoints and plugs them into the Express app.
+- Updated `server/server.js` to mount `/api/ai`.
+- Added `AI_API_KEY` to `.env.example` and `server/.env`.
+
+### New Frontend Services & UI
+- `src/services/api.js` – new `aiAPI` export for calling the AI endpoints.
+- `src/services/debateService.js` – wrapper `requestAIReply(debateId, payload)` that forwards user messages to the backend AI service.
+- `src/components/AnalysisDashboard.jsx` – visual component that renders the AI’s structured feedback with colour‑coded scores and interactive tooltips.
+- `src/pages/DebatePage.jsx` – integrated a typing indicator (`isAITyping`) and automatic fetching of AI analysis after each user turn.
+
+### Usage Flow
+1. User submits a message in a debate.
+2. Frontend calls `requestAIReply` → backend `aiService`.
+3. Gemini model returns JSON with scores and textual feedback.
+4. The response is saved in the `Debate` document and displayed in the **Analysis Dashboard**.
+5. Users can iterate, seeing the coach’s suggestions live.
+
+### API Overview (new endpoints)
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/ai/evaluate` | Accepts `{ debateId, messages }`, returns `{ analysis: { logicScore, evidenceScore, persuasionScore, fallacyCount, feedback } }` |
+
+### Folder Structure (new/updated)
+```
+server/
+  models/
+    Debate.js          # now includes AI fields
+  services/
+    aiService.js       # AI logic
+  controllers/
+    aiController.js    # route handlers
+  routes/
+    aiRoutes.js        # AI API routes
+src/
+  components/
+    AnalysisDashboard.jsx
+  services/
+    api.js            # includes aiAPI
+    debateService.js   # uses aiAPI
+```
+
+### Running the Updated App
+1. **Backend** – install dependencies and set `AI_API_KEY` in `server/.env`.
+   ```bash
+   cd server
+   npm install
+   npm run dev
+   ```
+2. **Frontend** – no extra setup required; the new services are hot‑loaded.
+   ```bash
+   npm run dev
+   ```
+
+### Screenshots
+![AI Coaching UI](file:///C:/Users/NAITIK/.gemini/antigravity-ide/brain/e3a78ab3-0b78-4433-af48-695a4ebdb8fa/media__1780069532689.png)
+
+---
+
+## Next steps
+
+- Implement a **topic picker** to let users choose debate subjects.
+- Add a **"Finish Debate"** button that triggers a final AI summary report.
+- Explore **WebSocket** integration for real‑time multi‑user debates.
+
+*Enjoy debating with your new AI coach!*

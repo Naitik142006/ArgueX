@@ -370,6 +370,33 @@ const userAPI = {
 };
 
 // ============================================================
+// AI API CALLS
+// ============================================================
+
+const aiAPI = {
+  /**
+   * Generate debate topics
+   */
+  getTopics: async (category) => {
+    return makeRequest('/ai/topics', 'POST', { category });
+  },
+
+  /**
+   * Trigger AI to reply to a debate
+   */
+  getReply: async (debateId) => {
+    return makeRequest(`/ai/${debateId}/reply`, 'POST');
+  },
+
+  /**
+   * Analyze and score a completed debate
+   */
+  analyze: async (debateId) => {
+    return makeRequest(`/ai/${debateId}/analyze`, 'POST');
+  }
+};
+
+// ============================================================
 // EXPORT: Make API available to entire app
 // ============================================================
 
@@ -383,7 +410,7 @@ const userAPI = {
  * await debateAPI.getAll();
  * await messageAPI.send(debateId, text);
  */
-export { authAPI, debateAPI, messageAPI, userAPI };
+export { authAPI, debateAPI, messageAPI, userAPI, aiAPI };
 
 // Also export makeRequest for custom API calls
 export default makeRequest;

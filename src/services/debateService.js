@@ -1,4 +1,4 @@
-import { debateAPI, messageAPI } from './api.js';
+import { debateAPI, messageAPI, aiAPI } from './api.js';
 
 /**
  * Create Debate Request
@@ -48,6 +48,30 @@ export const fetchUserDebates = async () => {
     return await debateAPI.getAll();
   } catch (error) {
     console.error('Fetch debates failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Trigger AI Reply
+ */
+export const requestAIReply = async (debateId) => {
+  try {
+    return await aiAPI.getReply(debateId);
+  } catch (error) {
+    console.error('AI reply failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Analyze Debate
+ */
+export const requestDebateAnalysis = async (debateId) => {
+  try {
+    return await aiAPI.analyze(debateId);
+  } catch (error) {
+    console.error('AI analyze failed:', error);
     throw error;
   }
 };

@@ -32,19 +32,27 @@ const debateSchema = mongoose.Schema(
       required: [true, 'Debate topic is required'],
       trim: true,
     },
-    opponent: {
+    aiPersona: {
       type: String,
-      default: 'ArgueX AI Coach',
+      default: 'einstein',
     },
-    scores: {
-      user: {
-        type: Number,
-        default: 0,
-      },
-      opponent: {
-        type: Number,
-        default: 0,
-      },
+    status: {
+      type: String,
+      enum: ['active', 'completed'],
+      default: 'active',
+    },
+    analysis: {
+      logicScore: Number,
+      evidenceScore: Number,
+      persuasionScore: Number,
+      summary: String,
+      fallacies: [
+        {
+          name: String,
+          explanation: String,
+        }
+      ],
+      feedback: String,
     },
     messages: [messageSchema],
   },

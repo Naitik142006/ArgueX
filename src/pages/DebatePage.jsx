@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createDebateRequest, addDebateMessageRequest } from '../services/debateService.js';
+import { createDebateRequest, addDebateMessageRequest, requestAIReply } from '../services/debateService.js';
 
 function DebatePage() {
   const [topic, setTopic] = useState('AI in education');
@@ -10,6 +10,7 @@ function DebatePage() {
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [debateId, setDebateId] = useState(null);
+  const [isAITyping, setIsAITyping] = useState(false);
 
   const handleSend = async () => {
     if (!draft.trim()) return;
@@ -24,19 +25,35 @@ function DebatePage() {
       setError('');
       setStatus('Sending message...');
 
-      if (!debateId) {
+      let currentDebateId = debateId;
+
+      if (!currentDebateId) {
         const created = await createDebateRequest(topic, token);
         const updated = await addDebateMessageRequest(created._id, draft, token);
-        setDebateId(created._id);
+        currentDebateId = created._id;
+        setDebateId(currentDebateId);
         setMessages(updated.messages.map((message, index) => ({ ...message, id: index + 1 })));
         setStatus('Debate started and message saved.');
       } else {
-        const updated = await addDebateMessageRequest(debateId, draft, token);
+        const updated = await addDebateMessageRequest(currentDebateId, draft, token);
         setMessages(updated.messages.map((message, index) => ({ ...message, id: index + 1 })));
-        setStatus('Message sent to debate.');
+        setStatus('Message sent. Waiting for AI...');
       }
 
       setDraft('');
+      
+      // TRIGGER AI REPLY
+      setIsAITyping(true);
+      try {
+        const aiResponse = await requestAIReply(currentDebateId);
+        setMessages(aiResponse.messages.map((message, index) => ({ ...message, id: index + 1 })));
+        setStatus('AI replied.');
+      } catch (aiErr) {
+        setError('AI failed to reply: ' + aiErr.message);
+      } finally {
+        setIsAITyping(false);
+      }
+      
     } catch (err) {
       setError(err.message);
       setStatus('');
@@ -78,6 +95,16 @@ function DebatePage() {
                 <p className="mt-2 text-base leading-7">{message.text}</p>
               </div>
             ))}
+            {isAITyping && (
+              <div className="rounded-3xl bg-slate-800 px-4 py-3 text-slate-300">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">AI Coach</p>
+                <div className="mt-2 flex items-center space-x-2">
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-slate-500 [animation-delay:-0.3s]"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-slate-500 [animation-delay:-0.15s]"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-slate-500"></div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-3 rounded-3xl border border-slate-800 bg-slate-900/95 p-4 sm:flex-row sm:items-center">
@@ -90,7 +117,8 @@ function DebatePage() {
             <button
               type="button"
               onClick={handleSend}
-              className="rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+              disabled={isAITyping}
+              className="rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:opacity-50"
             >
               Send
             </button>
