@@ -8,13 +8,12 @@ import aiRoutes from './routes/aiRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
-connectDB();
 
 const app = express();
 
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: [/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/],
     credentials: true,
   })
 );
@@ -32,6 +31,17 @@ app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server listening on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start backend:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

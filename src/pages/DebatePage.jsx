@@ -15,7 +15,7 @@ function DebatePage() {
   const handleSend = async () => {
     if (!draft.trim()) return;
 
-    const token = window.localStorage.getItem('arguexToken');
+    const token = window.localStorage.getItem('token');
     if (!token) {
       setError('You must be logged in to send a message.');
       return;

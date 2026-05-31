@@ -5,13 +5,12 @@ import { debateAPI, messageAPI, aiAPI } from './api.js';
  * 
  * Calls the backend to create a new debate
  * 
- * @param {string} title - Debate title
- * @param {string} description - Debate description
+ * @param {string} topic - Debate topic
  * @returns {Promise<object>} - Created debate
  */
-export const createDebateRequest = async (title, description) => {
+export const createDebateRequest = async (topic) => {
   try {
-    return await debateAPI.create(title, description);
+    return await debateAPI.create(topic);
   } catch (error) {
     console.error('Create debate failed:', error);
     throw error;

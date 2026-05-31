@@ -316,7 +316,7 @@ const messageAPI = {
    * @returns {Promise<object>} - Updated debate with new message
    */
   send: async (debateId, text) => {
-    return makeRequest(`/debates/${debateId}/messages`, 'POST', {
+    return makeRequest(`/debates/${debateId}`, 'POST', {
       text,
     });
   },
@@ -328,7 +328,7 @@ const messageAPI = {
    * @returns {Promise<array>} - Array of messages
    */
   getAll: async (debateId) => {
-    return makeRequest(`/debates/${debateId}/messages`, 'GET');
+    return makeRequest(`/debates/${debateId}`, 'GET');
   },
 };
 
