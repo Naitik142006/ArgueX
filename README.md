@@ -215,28 +215,33 @@ Now that ArgueX has robust authentication, next phases will explore:
 - `server/models/Debate.js` – expanded schema with `aiPersona`, `status`, and `analysis` fields to store AI‑generated insights.
 - `server/services/aiService.js` – thin wrapper around `@google/generative‑ai` that formats prompts, calls the Gemini model, and enforces JSON responses.
 - `server/controllers/aiController.js` – route handlers for:
-  - `POST /api/ai/evaluate` – send debate context, receive structured analysis (logic, evidence, persuasion, fallacies, feedback).
+  - `POST /api/ai/topics` – generate debate topic suggestions.
+  - `POST /api/ai/:id/reply` – send debate history and get an AI reply.
+  - `POST /api/ai/:id/analyze` – generate structured analysis and scoring for a debate.
 - `server/routes/aiRoutes.js` – registers the AI endpoints and plugs them into the Express app.
 - Updated `server/server.js` to mount `/api/ai`.
-- Added `AI_API_KEY` to `.env.example` and `server/.env`.
+- Added `AI_API_KEY` to `server/.env.example`; create `server/.env` with the key locally.
 
 ### New Frontend Services & UI
 - `src/services/api.js` – new `aiAPI` export for calling the AI endpoints.
-- `src/services/debateService.js` – wrapper `requestAIReply(debateId, payload)` that forwards user messages to the backend AI service.
+- `src/services/debateService.js` – wrapper functions like `requestAIReply(debateId)` and `requestDebateAnalysis(debateId)` that forward debate actions to the backend AI service.
 - `src/components/AnalysisDashboard.jsx` – visual component that renders the AI’s structured feedback with colour‑coded scores and interactive tooltips.
 - `src/pages/DebatePage.jsx` – integrated a typing indicator (`isAITyping`) and automatic fetching of AI analysis after each user turn.
 
 ### Usage Flow
-1. User submits a message in a debate.
-2. Frontend calls `requestAIReply` → backend `aiService`.
-3. Gemini model returns JSON with scores and textual feedback.
-4. The response is saved in the `Debate` document and displayed in the **Analysis Dashboard**.
-5. Users can iterate, seeing the coach’s suggestions live.
+1. User chooses or generates a debate topic.
+2. User submits a message in a debate.
+3. Frontend calls `requestAIReply` → backend `aiService`.
+4. Gemini model returns the AI reply and the debate saves the new message.
+5. When the user requests analysis, the frontend calls `requestDebateAnalysis` and the backend stores structured feedback in the debate document.
+6. The **Analysis Dashboard** displays scores, fallacies, and improvement suggestions.
 
 ### API Overview (new endpoints)
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/ai/evaluate` | Accepts `{ debateId, messages }`, returns `{ analysis: { logicScore, evidenceScore, persuasionScore, fallacyCount, feedback } }` |
+| `POST` | `/api/ai/topics` | Generate debate topics based on category input |
+| `POST` | `/api/ai/:id/reply` | Generate an AI response for the current debate conversation |
+| `POST` | `/api/ai/:id/analyze` | Analyze the debate and return structured scores and feedback |
 
 ### Folder Structure (new/updated)
 ```

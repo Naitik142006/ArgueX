@@ -8,6 +8,10 @@ import aiRoutes from './routes/aiRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 dotenv.config();
+console.info('Environment loaded:', {
+  AI_API_KEY: !!process.env.AI_API_KEY,
+  PORT: process.env.PORT || 5000,
+});
 
 const app = express();
 

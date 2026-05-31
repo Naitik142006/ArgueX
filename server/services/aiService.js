@@ -22,24 +22,11 @@ const getAIClient = () => {
   return new GoogleGenerativeAI(apiKey);
 };
 
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
-// Mock debate responses for development
-const mockDebateResponses = {
-  default: [
-    "That's an interesting perspective. However, I think we should consider the opposing viewpoint. What evidence supports your claim? Can you provide specific examples?",
-    "I see your point, but there are alternative interpretations we haven't explored. For instance, some might argue that the situation is more complex than it appears.",
-    "You raise a valid concern. Building on that, let me propose a counterargument: perhaps we're overlooking a crucial factor that could change the entire dynamic.",
-    "Your argument has merit, but consider this angle: the data suggests a slightly different conclusion. What would you say to that interpretation?",
-    "Interesting assertion. However, historical precedent shows that similar situations often resulted in unexpected outcomes. Doesn't that concern you?"
-  ]
+const logGeminiEvent = (event, meta) => {
+  console.info(`[Gemini] ${event}`, Object.assign({ model: GEMINI_MODEL }, meta));
 };
-
-// Get random mock response
-const getMockResponse = (userMessage) => {
-  const responses = mockDebateResponses.default;
-  return responses[Math.floor(Math.random() * responses.length)];
-};
-
 
 export const aiService = {
 
@@ -51,24 +38,35 @@ export const aiService = {
    * @param {String} userMessage - The latest user message
    */
   generateDebateResponse: async (history, personaId, currentTopic, userMessage) => {
+    const genAI = getAIClient();
+    const model = genAI.getGenerativeModel({ 
+      model: GEMINI_MODEL,
+      generationConfig: { temperature: 0.7 } 
+    });
+
+    const persona = getPersonality(personaId);
+    const fullPrompt = buildDebatePrompt(persona, history, currentTopic, userMessage);
+
+    logGeminiEvent('generateDebateResponse.request', {
+      temperature: 0.7,
+      persona: personaId,
+      topic: currentTopic,
+      historyLength: history.length,
+    });
+
     try {
-      const genAI = getAIClient();
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-pro",
-        generationConfig: { temperature: 0.7 } 
-      });
-      
-      const persona = getPersonality(personaId);
-      const fullPrompt = buildDebatePrompt(persona, history, currentTopic, userMessage);
       const result = await model.generateContent(fullPrompt);
       const response = await result.response;
       const text = response.text();
-      
+
+      console.info('[Gemini] generateDebateResponse.success', {
+        responseLength: text.length,
+      });
       return text;
     } catch (error) {
-      console.error("AI Service Error (generateDebateResponse):", error.message || error);
-      console.error("Full error stack:", error);
-      return getMockResponse(userMessage);
+      console.error('AI Service Error (generateDebateResponse):', error.message || error);
+      console.error('Full error stack:', error);
+      throw new Error(`Gemini generateDebateResponse failed: ${error.message || error}`);
     }
   },
 
@@ -76,18 +74,14 @@ export const aiService = {
    * Evaluates a completed debate and forces the AI to output strictly structured JSON.
    */
   evaluateDebate: async (messages) => {
-    try {
-      const genAI = getAIClient();
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-pro",
-        generationConfig: { 
-          temperature: 0.0
-        }
-      });
-      
-      let historyText = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
-      
-      const prompt = `You are an expert debate judge and logician.
+    const genAI = getAIClient();
+    const model = genAI.getGenerativeModel({ 
+      model: GEMINI_MODEL,
+      generationConfig: { temperature: 0.0 }
+    });
+
+    const historyText = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
+    const prompt = `You are an expert debate judge and logician.
 Analyze the following debate history between a User and an AI.
 
 DEBATE HISTORY:
@@ -106,32 +100,30 @@ Evaluate the User's performance. You must return your evaluation strictly as a v
   "feedback": "<1 paragraph of constructive feedback for the user>"
 }`;
 
+    logGeminiEvent('evaluateDebate.request', {
+      temperature: 0.0,
+      historyLength: messages.length,
+    });
+
+    try {
       const result = await model.generateContent(prompt);
       const text = await result.response.text();
-      
+
+      console.info('[Gemini] evaluateDebate.success', {
+        responseLength: text.length,
+      });
+
       try {
         return JSON.parse(text);
       } catch (parseError) {
-        console.warn("Failed to parse JSON response, returning fallback analysis");
-        return {
-          logicScore: 7,
-          evidenceScore: 6,
-          persuasionScore: 7,
-          summary: "User presented coherent arguments on the topic.",
-          fallacies: [],
-          feedback: "Good effort. Consider providing more concrete examples and evidence."
-        };
+        console.error('AI Service Error (evaluateDebate.parse): invalid JSON', parseError.message);
+        console.error('Gemini raw response:', text);
+        throw new Error(`Gemini evaluateDebate returned invalid JSON: ${parseError.message}`);
       }
     } catch (error) {
-      console.error("AI Service Error (evaluateDebate):", error.message || error);
-      return {
-        logicScore: 5,
-        evidenceScore: 5,
-        persuasionScore: 5,
-        summary: "Debate evaluation could not be completed.",
-        fallacies: [],
-        feedback: "Unable to analyze debate at this time. Please try again later."
-      };
+      console.error('AI Service Error (evaluateDebate):', error.message || error);
+      console.error('Full error stack:', error);
+      throw new Error(`Gemini evaluateDebate failed: ${error.message || error}`);
     }
   },
   
@@ -139,40 +131,39 @@ Evaluate the User's performance. You must return your evaluation strictly as a v
    * Generates a list of debate topics based on a category.
    */
   generateTopics: async (category) => {
-    try {
-      const genAI = getAIClient();
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-pro",
-        generationConfig: { temperature: 0.9 }
-      });
+    const genAI = getAIClient();
+    const model = genAI.getGenerativeModel({ 
+      model: GEMINI_MODEL,
+      generationConfig: { temperature: 0.9 }
+    });
 
-      const prompt = `Generate 5 highly controversial and interesting debate topics in the category of "${category}".
+    const prompt = `Generate 5 highly controversial and interesting debate topics in the category of "${category}".
 Return as a JSON array of strings only, no other text. Example: ["Topic 1", "Topic 2"]`;
 
+    logGeminiEvent('generateTopics.request', {
+      temperature: 0.9,
+      category,
+    });
+
+    try {
       const result = await model.generateContent(prompt);
       const text = await result.response.text();
-      
+
+      console.info('[Gemini] generateTopics.success', {
+        responseLength: text.length,
+      });
+
       try {
         return JSON.parse(text);
       } catch (parseError) {
-        console.warn("Failed to parse topics JSON, returning defaults");
-        return [
-          "Is artificial intelligence a threat to humanity?",
-          "Should social media be regulated by governments?",
-          "Is climate change primarily human-caused?",
-          "Should universal basic income be implemented?",
-          "Is space exploration worth the investment?"
-        ];
+        console.error('AI Service Error (generateTopics.parse): invalid JSON', parseError.message);
+        console.error('Gemini raw response:', text);
+        throw new Error(`Gemini generateTopics returned invalid JSON: ${parseError.message}`);
       }
     } catch (error) {
-      console.error("AI Service Error (generateTopics):", error.message || error);
-      return [
-        "Is artificial intelligence a threat to humanity?",
-        "Should social media be regulated by governments?",
-        "Is climate change primarily human-caused?",
-        "Should universal basic income be implemented?",
-        "Is space exploration worth the investment?"
-      ];
+      console.error('AI Service Error (generateTopics):', error.message || error);
+      console.error('Full error stack:', error);
+      throw new Error(`Gemini generateTopics failed: ${error.message || error}`);
     }
   }
 
