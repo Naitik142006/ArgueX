@@ -1,0 +1,447 @@
+/* Debate Statistics Styles */
+
+.debate-statistics {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  margin-top: 20px;
+}
+
+/* Tabs */
+.stats-tabs {
+  display: flex;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-bottom: 3px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tab-button:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tab-button.active {
+  color: white;
+  border-bottom-color: #ffc107;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Content */
+.stats-content {
+  padding: 24px;
+  color: white;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Loading & Error */
+.statistics-loading,
+.statistics-error {
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+}
+
+/* Section */
+.stats-section {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stats-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 12px;
+}
+
+.stats-section h4 {
+  margin: 20px 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Grid Layout */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.stat-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffc107;
+}
+
+/* Sentiment Summary */
+.sentiment-summary {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.sentiment-score {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.score-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.score-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #4caf50;
+  margin-bottom: 4px;
+}
+
+.score-range {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* Sentiment Chart */
+.sentiment-chart {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.chart-title {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 150px;
+  gap: 16px;
+}
+
+.chart-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.chart-bar {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 6px 6px 0 0;
+  min-height: 20px;
+  margin-bottom: 8px;
+  transition: all 0.3s;
+}
+
+.chart-bar.positive {
+  background: linear-gradient(to top, #4caf50, #81c784);
+}
+
+.chart-bar.neutral {
+  background: linear-gradient(to top, #9e9e9e, #bdbdbd);
+}
+
+.chart-bar.negative {
+  background: linear-gradient(to top, #f44336, #ef5350);
+}
+
+.chart-bar:hover {
+  opacity: 0.8;
+  filter: brightness(1.1);
+}
+
+.chart-label {
+  font-size: 0.75rem;
+  text-align: center;
+  opacity: 0.7;
+  line-height: 1.3;
+}
+
+/* Dominant Sentiment */
+.dominant-sentiment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.dominant-sentiment .label {
+  font-weight: 600;
+}
+
+.dominant-sentiment .badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Participant List */
+.participant-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.participant-stat {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.participant-name {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.participant-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-label {
+  opacity: 0.8;
+}
+
+.metric-value {
+  font-weight: 600;
+  color: #ffc107;
+}
+
+.metric-value.sentiment-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.8rem;
+}
+
+.engagement-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.engagement-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #81c784);
+  border-radius: 3px;
+  transition: all 0.3s;
+}
+
+/* Reactions List */
+.reactions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.reaction-stat {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.reaction-stat:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.reaction-emoji {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.reaction-label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.reaction-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffc107;
+}
+
+/* Pinned Section */
+.pinned-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pinned-section h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.pinned-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pinned-item {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-left: 3px solid #ffc107;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+}
+
+.pinned-author {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.pinned-message {
+  margin-bottom: 6px;
+  line-height: 1.3;
+  word-wrap: break-word;
+}
+
+.pinned-reactions {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* No Data */
+.no-data {
+  text-align: center;
+  padding: 20px;
+  opacity: 0.6;
+  font-size: 0.9rem;
+}
+
+/* Scrollbar */
+.stats-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.stats-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stats-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.stats-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sentiment-summary {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .participant-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card {
+    min-width: 100px;
+  }
+
+  .stats-tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab-button {
+    flex: 0 0 50%;
+    font-size: 0.8rem;
+    padding: 10px 8px;
+  }
+}

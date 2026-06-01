@@ -1,0 +1,264 @@
+/* DebateRoom Container Styles */
+
+.debate-room {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.debate-room.loading,
+.debate-room.error {
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner {
+  background: white;
+  padding: 40px 60px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #667eea;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.error-message {
+  background: white;
+  padding: 40px 60px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.error-message p {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #d32f2f;
+}
+
+.error-message button {
+  padding: 10px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.error-message button:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+/* Main Container */
+.debate-room-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+/* Header */
+.debate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: white;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+}
+
+.debate-info h1 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.debate-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.room-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.room-status.waiting {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.room-status.active {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.room-status.ended {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.debate-position {
+  background: #f3e5f5;
+  color: #6a1b9a;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Actions */
+.debate-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5568d3;
+}
+
+.btn-danger {
+  background: #d32f2f;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #b71c1c;
+}
+
+.btn-secondary {
+  background: #999;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #777;
+}
+
+/* Content Area */
+.debate-content {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Status Message */
+.debate-ended-message {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  color: #666;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .debate-content {
+    grid-template-columns: 1fr;
+  }
+
+  .participant-list {
+    min-width: auto;
+    height: auto;
+    min-height: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .debate-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .debate-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    flex: 1;
+  }
+
+  .debate-info h1 {
+    font-size: 20px;
+  }
+
+  .debate-room-container {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .debate-info h1 {
+    font-size: 18px;
+  }
+
+  .debate-meta {
+    flex-wrap: wrap;
+  }
+
+  .debate-content {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .chat-input-form {
+    padding: 8px;
+  }
+
+  .input-group {
+    gap: 4px;
+  }
+
+  .position-select {
+    min-width: 70px;
+  }
+}

@@ -7,6 +7,7 @@ import SignupPage from './pages/SignupPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import DebatePage from './pages/DebatePage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import DebateRoom from './components/DebateRoom.jsx';
 
 function App() {
   return (
@@ -36,6 +37,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="room/:roomId"
+          element={
+            <ProtectedRoute>
+              <DebateRoom />
             </ProtectedRoute>
           }
         />
