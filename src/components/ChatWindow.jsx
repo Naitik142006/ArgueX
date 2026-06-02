@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import MessageItem from './MessageItem';
 import '../styles/ChatWindow.css';
 
 /**
@@ -16,7 +17,14 @@ export default function ChatWindow({
   onStoppedTyping,
   typingUsers,
   currentUser,
-  isLoading 
+  isLoading,
+  onAddReaction,
+  onRemoveReaction,
+  onEditMessage,
+  onDeleteMessage,
+  onPinMessage,
+  onReply,
+  onShowThread,
 }) {
   const [input, setInput] = useState('');
   const [position, setPosition] = useState('pro');
@@ -117,22 +125,19 @@ export default function ChatWindow({
         )}
 
         {messages.map((message, idx) => (
-          <div key={idx} className={getMessageClass(message)}>
-            <div className="message-header">
-              <span className="message-author">{message.userName}</span>
-              {message.position && (
-                <span className={`message-position ${message.position}`}>
-                  {message.position.toUpperCase()}
-                </span>
-              )}
-              <span className="message-time">
-                {formatTime(message.timestamp)}
-              </span>
-            </div>
-            <div className="message-content">
-              {message.message}
-            </div>
-          </div>
+          <MessageItem
+            key={message._id || message.id || idx}
+            message={message}
+            currentUser={currentUser}
+            isOwn={message.userId === currentUser?.id}
+            onReply={(mid) => onReply && onReply(mid)}
+            onAddReaction={(mid, emoji) => onAddReaction && onAddReaction(mid, emoji)}
+            onRemoveReaction={(mid, emoji) => onRemoveReaction && onRemoveReaction(mid, emoji)}
+            onEdit={(mid, newText) => onEditMessage && onEditMessage(mid, newText)}
+            onDelete={(mid) => onDeleteMessage && onDeleteMessage(mid)}
+            onPin={(mid) => onPinMessage && onPinMessage(mid)}
+            onShowThread={(mid) => onShowThread && onShowThread(mid)}
+          />
         ))}
 
         {/* Typing Indicators */}

@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import DebateRoom from '../models/DebateRoom.js';
+import sentimentService from '../services/sentimentService.js';
 
 /**
  * Socket.IO Architecture
@@ -210,10 +211,13 @@ export const initializeSocket = (server, options = {}) => {
       }
 
       try {
-        // Find and update room with message
+        // Analyze sentiment for the message
+        const sentiment = sentimentService.analyzeSentiment(message);
+
+        // Find and update room with message (include sentiment)
         const room = await DebateRoom.findOne({ roomId });
         if (room) {
-          await room.addMessage(socket.userId, socket.userName, message, position);
+          await room.addMessage(socket.userId, socket.userName, message, position, null, sentiment);
         }
 
         const messageData = {
@@ -223,6 +227,7 @@ export const initializeSocket = (server, options = {}) => {
           roomId,
           debateId,
           position,
+          sentiment,
           socketId: socket.id,
           timestamp: new Date(),
         };
@@ -355,13 +360,25 @@ export const initializeSocket = (server, options = {}) => {
         if (room) {
           await room.editMessage(messageId, newMessage, socket.userId);
 
-          const message = room.messages.find(m => m._id.toString() === messageId.toString());
+          // Re-run sentiment on edited message and persist
+          const updatedMessage = room.messages.find(m => m._id.toString() === messageId.toString());
+          if (updatedMessage) {
+            const newSentiment = sentimentService.analyzeSentiment(newMessage);
+            updatedMessage.sentiment = {
+              label: newSentiment.label,
+              score: newSentiment.score,
+              confidence: newSentiment.confidence,
+              emotion: newSentiment.emotion,
+            };
+            await room.save();
+          }
 
           io.to(roomId).emit('messageEdited', {
             messageId,
             newMessage,
             isEdited: true,
-            lastEditedAt: message.lastEditedAt,
+            lastEditedAt: updatedMessage ? updatedMessage.lastEditedAt : new Date(),
+            sentiment: updatedMessage ? updatedMessage.sentiment : null,
             timestamp: new Date(),
           });
         }

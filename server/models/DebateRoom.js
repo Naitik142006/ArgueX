@@ -267,10 +267,10 @@ debateRoomSchema.pre('save', function(next) {
 /**
  * Method: Add message to room
  */
-debateRoomSchema.methods.addMessage = function(userId, userName, message, position, parentId = null) {
+debateRoomSchema.methods.addMessage = function(userId, userName, message, position, parentId = null, sentiment = null) {
   const messageId = new mongoose.Types.ObjectId();
-  
-  this.messages.push({
+
+  const msgObj = {
     _id: messageId,
     userId,
     userName,
@@ -278,10 +278,22 @@ debateRoomSchema.methods.addMessage = function(userId, userName, message, positi
     position,
     parentId,
     createdAt: new Date(),
-  });
-  
+  };
+
+  // Attach sentiment if provided
+  if (sentiment) {
+    msgObj.sentiment = {
+      label: sentiment.label || 'NEUTRAL',
+      score: typeof sentiment.score === 'number' ? sentiment.score : 0,
+      confidence: typeof sentiment.confidence === 'number' ? sentiment.confidence : 0,
+      emotion: sentiment.emotion || 'NEUTRAL',
+    };
+  }
+
+  this.messages.push(msgObj);
+
   this.messageCount = this.messages.length;
-  
+
   // If this is a reply, increment parent's replyCount
   if (parentId) {
     const parent = this.messages.find(m => m._id.equals(parentId));
@@ -293,7 +305,7 @@ debateRoomSchema.methods.addMessage = function(userId, userName, message, positi
       this.statistics.threadsCount = this.messages.filter(m => m.parentId !== null && m.parentId !== undefined).length;
     }
   }
-  
+
   return this.save();
 };
 

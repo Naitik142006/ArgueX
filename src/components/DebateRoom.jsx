@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { emitEvent, listenEvent } from '../services/socketService';
+import { emitEvent, listenEvent, removeEventListener, getSocket } from '../services/socketService';
 import ChatWindow from './ChatWindow';
 import ParticipantList from './ParticipantList';
+import DebateStatistics from './DebateStatistics';
+import MessageThread from './MessageThread';
 import '../styles/DebateRoom.css';
 
 /**
@@ -29,6 +31,8 @@ export default function DebateRoom() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [roomStatus, setRoomStatus] = useState('waiting'); // waiting, active, ended
+  const [showStatistics, setShowStatistics] = useState(false);
+  const [selectedThread, setSelectedThread] = useState(null);
 
   /**
    * Initialize room and Socket.IO connection
@@ -114,6 +118,41 @@ export default function DebateRoom() {
     };
     listenEvent('debateMessage', handleDebateMessage);
 
+    // Reactions
+    const handleReactionAdded = (data) => {
+      setMessages(prev => prev.map(m => m._id === data.messageId ? { ...m, reactionCount: (m.reactionCount || 0) + 1 } : m));
+    };
+    listenEvent('reactionAdded', handleReactionAdded);
+
+    const handleReactionRemoved = (data) => {
+      setMessages(prev => prev.map(m => m._id === data.messageId ? { ...m, reactionCount: Math.max(0, (m.reactionCount || 1) - 1) } : m));
+    };
+    listenEvent('reactionRemoved', handleReactionRemoved);
+
+    // Message edited
+    const handleMessageEdited = (data) => {
+      setMessages(prev => prev.map(m => m._id === data.messageId ? { ...m, message: data.newMessage, isEdited: true, lastEditedAt: data.lastEditedAt } : m));
+    };
+    listenEvent('messageEdited', handleMessageEdited);
+
+    // Message deleted
+    const handleMessageDeleted = (data) => {
+      setMessages(prev => prev.filter(m => m._id !== data.messageId));
+    };
+    listenEvent('messageDeleted', handleMessageDeleted);
+
+    // Message pinned
+    const handleMessagePinned = (data) => {
+      setMessages(prev => prev.map(m => m._id === data.messageId ? { ...m, isPinned: true } : m));
+    };
+    listenEvent('messagePinned', handleMessagePinned);
+
+    // Reply sent (thread count)
+    const handleReplySent = (data) => {
+      setMessages(prev => prev.map(m => m._id === data.parentId ? { ...m, replyCount: (m.replyCount || 0) + 1 } : m));
+    };
+    listenEvent('replySent', handleReplySent);
+
     /**
      * Listen for user join
      */
@@ -174,8 +213,20 @@ export default function DebateRoom() {
      * Cleanup listeners on unmount
      */
     return () => {
-      // TODO: Implement proper event listener cleanup
+      // Cleanup listeners and leave room
       emitEvent('leaveRoom', { roomId });
+      removeEventListener('roomState', handleRoomState);
+      removeEventListener('debateMessage', handleDebateMessage);
+      removeEventListener('userJoined', handleUserJoined);
+      removeEventListener('userLeft', handleUserLeft);
+      removeEventListener('userTyping', handleUserTyping);
+      removeEventListener('userStoppedTyping', handleUserStoppedTyping);
+      removeEventListener('reactionAdded', handleReactionAdded);
+      removeEventListener('reactionRemoved', handleReactionRemoved);
+      removeEventListener('messageEdited', handleMessageEdited);
+      removeEventListener('messageDeleted', handleMessageDeleted);
+      removeEventListener('messagePinned', handleMessagePinned);
+      removeEventListener('replySent', handleReplySent);
     };
   }, [roomId]);
 
@@ -192,6 +243,37 @@ export default function DebateRoom() {
 
     // Also emit stopped typing
     emitEvent('userStoppedTyping', { roomId });
+  };
+
+  /**
+   * Reaction handlers -> emit socket events
+   */
+  const handleAddReaction = (messageId, reaction) => {
+    emitEvent('addReaction', { roomId, messageId, reaction });
+  };
+
+  const handleRemoveReaction = (messageId, reaction) => {
+    emitEvent('removeReaction', { roomId, messageId, reaction });
+  };
+
+  const handleEditMessage = (messageId, newMessage) => {
+    emitEvent('editMessage', { roomId, messageId, newMessage });
+  };
+
+  const handleDeleteMessage = (messageId) => {
+    emitEvent('deleteMessage', { roomId, messageId });
+  };
+
+  const handlePinMessage = (messageId) => {
+    emitEvent('pinMessage', { roomId, messageId });
+  };
+
+  const handleReplyToMessage = (parentId, message, position) => {
+    emitEvent('replyToMessage', { roomId, parentId, message, position });
+  };
+
+  const handleShowThread = (messageId) => {
+    setSelectedThread(messageId);
   };
 
   /**
@@ -320,15 +402,22 @@ export default function DebateRoom() {
 
         {/* Main content: Chat + Participants */}
         <div className="debate-content">
-          <ChatWindow
-            messages={messages}
-            onSendMessage={handleSendMessage}
-            onTyping={handleTyping}
-            onStoppedTyping={handleStoppedTyping}
-            typingUsers={typingUsers}
-            currentUser={user}
-            isLoading={isLoading}
-          />
+            <ChatWindow
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              onTyping={handleTyping}
+              onStoppedTyping={handleStoppedTyping}
+              typingUsers={typingUsers}
+              currentUser={user}
+              isLoading={isLoading}
+              onAddReaction={handleAddReaction}
+              onRemoveReaction={handleRemoveReaction}
+              onEditMessage={handleEditMessage}
+              onDeleteMessage={handleDeleteMessage}
+              onPinMessage={handlePinMessage}
+              onReply={(mid) => setSelectedThread(mid)}
+              onShowThread={handleShowThread}
+            />
 
           <ParticipantList
             participants={participants}
@@ -336,6 +425,31 @@ export default function DebateRoom() {
             maxParticipants={room?.maxParticipants || 2}
           />
         </div>
+
+        {/* Statistics panel */}
+        <div className="statistics-toggle">
+          <button className="btn btn-outline" onClick={() => setShowStatistics(!showStatistics)}>
+            {showStatistics ? 'Hide Statistics' : 'Show Statistics'}
+          </button>
+        </div>
+
+        {showStatistics && (
+          <div className="statistics-panel">
+            <DebateStatistics roomId={roomId} socket={getSocket()} currentUser={user} />
+          </div>
+        )}
+
+        {/* Thread modal */}
+        {selectedThread && (
+          <MessageThread
+            message={messages.find(m => m._id === selectedThread)}
+            roomId={roomId}
+            currentUser={user}
+            onClose={() => setSelectedThread(null)}
+            onSendReply={({ parentId, message, position }) => handleReplyToMessage(parentId, message, position)}
+            onAddReaction={(mid, emoji) => handleAddReaction(mid, emoji)}
+          />
+        )}
 
         {/* Status message when room ends */}
         {roomStatus === 'ended' && (
