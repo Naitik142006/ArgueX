@@ -11,7 +11,7 @@ import '../styles/DebateStatistics.css';
  * - Participant engagement
  * - Timeline metrics
  */
-export default function DebateStatistics({ roomId, socket, currentUser }) {
+export default function DebateStatistics({ roomId, socket, currentUser, apiPath = '/api/chat/rooms' }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -25,7 +25,7 @@ export default function DebateStatistics({ roomId, socket, currentUser }) {
     const fetchStatistics = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`/api/chat/rooms/${roomId}/statistics`, {
+        const response = await fetch(`${apiPath}/${roomId}/statistics`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

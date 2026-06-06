@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import DebateRoom from '../models/DebateRoom.js';
+import User from '../models/User.js';
 import sentimentService from '../services/sentimentService.js';
 
 /**
@@ -43,23 +44,38 @@ export const initializeSocket = (server, options = {}) => {
    * Every socket connection passes through this middleware.
    * If auth fails, connection is rejected.
    */
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     try {
-      const token = socket.handshake.auth.token;
+      const token = socket.handshake.auth?.token;
 
+      // Development bypass: allow connections without token when explicitly enabled
       if (!token) {
+        if (process.env.ALLOW_SOCKET_NOAUTH === 'true' && process.env.NODE_ENV !== 'production') {
+          socket.userId = 'dev-user-0001';
+          socket.userEmail = 'dev@local';
+          socket.userName = 'DevBypassUser';
+          console.warn('Socket connected without token (dev bypass enabled).');
+          return next();
+        }
+
         return next(new Error('Authentication error: no token'));
       }
 
       // Verify JWT token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
       
+      // Fetch user from DB
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return next(new Error('Authentication error: User not found'));
+      }
+      
       // Attach user to socket object
-      socket.userId = decoded.id;
-      socket.userEmail = decoded.email;
-      socket.userName = decoded.name;
+      socket.userId = user._id;
+      socket.userEmail = user.email;
+      socket.userName = user.username || user.name || 'User';
 
-      console.log(`✓ Socket authenticated: ${socket.id} (User: ${decoded.name})`);
+      console.log(`✓ Socket authenticated: ${socket.id} (User: ${socket.userName})`);
       next();
     } catch (error) {
       console.error('✗ Socket authentication failed:', error.message);
@@ -81,7 +97,7 @@ export const initializeSocket = (server, options = {}) => {
     ╔════════════════════════════════════╗
     ║ NEW CONNECTION                     ║
     ║ Socket ID: ${socket.id.substring(0, 8)}...      ║
-    ║ User: ${socket.userName}${' '.repeat(15 - socket.userName.length)}║
+    ║ User: ${socket.userName}${' '.repeat(Math.max(0, 15 - (socket.userName?.length || 0)))}║
     ║ Time: ${new Date().toLocaleTimeString()}${' '.repeat(20)}║
     ╚════════════════════════════════════╝
     `);
@@ -489,8 +505,8 @@ export const initializeSocket = (server, options = {}) => {
       console.log(`
       ╔════════════════════════════════════╗
       ║ DISCONNECTED                       ║
-      ║ User: ${socket.userName}${' '.repeat(17 - socket.userName.length)}║
-      ║ Reason: ${reason}${' '.repeat(26 - reason.length)}║
+      ║ User: ${socket.userName}${' '.repeat(Math.max(0, 17 - (socket.userName?.length || 0)))}║
+      ║ Reason: ${reason}${' '.repeat(Math.max(0, 26 - (reason?.length || 0)))}║
       ║ Time: ${new Date().toLocaleTimeString()}${' '.repeat(20)}║
       ╚════════════════════════════════════╝
       `);

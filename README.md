@@ -74,6 +74,7 @@ Create a `.env` file in `server/` from `.env.example` and set:
 - MONGO_URI — your MongoDB Atlas connection string
 - JWT_SECRET — secret key for signing tokens
 - PORT — optional backend port (default 5000)
+- AI_API_KEY — Google Gemini API Key for the debate AI
 
 Then run:
 
@@ -279,10 +280,28 @@ src/
 
 ---
 
+## Phase 5 — Real-Time WebSockets & Debate Statistics
+
+🚀 **What’s new?** ArgueX is now truly real-time. We've integrated Socket.io for live updates, enhanced the AI Coach persona to be a generalized debate mentor, and added a rich Debate Statistics Dashboard.
+
+### Key Additions
+* 🔌 **Real-time WebSockets**: Integrated `Socket.io` to provide instant message delivery, real-time typing indicators, and live reaction updates without refreshing the page.
+* 📊 **Debate Statistics Dashboard**: A brand new UI component that visualizes debate metrics, including message counts, participant engagement, debate duration, and sentiment analysis for both multiplayer rooms and AI debates.
+* 🤖 **Generalized AI Coach Persona**: Evolved the AI from a strict Albert Einstein impersonator into a generalized "ArgueX AI Coach". The coach now provides intellectual, encouraging, and highly logical feedback to help users construct stronger arguments.
+* 🐛 **Bug Fixes & Stability**: Resolved a critical crash caused by negative string padding in the Socket.io middleware and fixed socket authentication to fetch complete user profiles from MongoDB.
+
+### API Overview (Phase 5 updates)
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/debates/:id/statistics` | Retrieve real-time statistics for an AI debate |
+| `GET` | `/api/chat/rooms/:roomId/statistics` | Retrieve real-time statistics for a multiplayer chat room |
+
+---
+
 ## Next steps
 
 - Implement a **topic picker** to let users choose debate subjects.
 - Add a **"Finish Debate"** button that triggers a final AI summary report.
-- Explore **WebSocket** integration for real‑time multi‑user debates.
+- Expand multi-user debate rooms with moderation tools.
 
-*Enjoy debating with your new AI coach!*
+*Enjoy debating with your new real-time AI coach!*

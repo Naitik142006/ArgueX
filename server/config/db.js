@@ -5,6 +5,11 @@ const connectDB = async () => {
     const uri = process.env.MONGO_URI;
 
     if (!uri) {
+      // In production we require a Mongo URI
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('MONGO_URI is required in production');
+      }
+
       console.warn('MONGO_URI not set — skipping MongoDB connection (running in socket-only mode)');
       return Promise.resolve();
     }

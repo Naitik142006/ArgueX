@@ -294,6 +294,7 @@ function DebatePage() {
               roomId={debateId}
               socket={socket}
               currentUser="You"
+              apiPath="/api/debates"
             />
           )}
 

@@ -62,3 +62,47 @@ export const addMessage = async (req, res) => {
 
   res.status(201).json(debate);
 };
+
+export const getDebateStatistics = async (req, res) => {
+  const debate = await Debate.findById(req.params.id);
+  if (!debate) {
+    res.status(404);
+    throw new Error('Debate not found');
+  }
+
+  const username = req.user.username || 'User';
+  const userMessages = debate.messages.filter(m => m.sender === 'User');
+  const aiMessages = debate.messages.filter(m => m.sender === 'AI');
+  const duration = debate.createdAt ? Math.round((new Date() - new Date(debate.createdAt)) / 60000) : 0;
+
+  res.json({
+    success: true,
+    statistics: {
+      messageCount: debate.messages.length,
+      participantCount: 2,
+      duration: duration,
+      rootMessages: debate.messages.length,
+      threads: 0,
+      topReactions: {},
+      totalReactions: 0,
+      pinnedMessages: [],
+      mostEmotionalMessages: [],
+      participantStats: [
+        {
+          user: username,
+          messageCount: userMessages.length,
+          averageLength: userMessages.length > 0 ? Math.round(userMessages.reduce((sum, m) => sum + m.text.length, 0) / userMessages.length) : 0,
+          reactionsReceived: 0,
+          sentiment: 0,
+        },
+        {
+          user: 'AI Coach',
+          messageCount: aiMessages.length,
+          averageLength: aiMessages.length > 0 ? Math.round(aiMessages.reduce((sum, m) => sum + m.text.length, 0) / aiMessages.length) : 0,
+          reactionsReceived: 0,
+          sentiment: 0,
+        }
+      ]
+    }
+  });
+};

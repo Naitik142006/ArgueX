@@ -260,10 +260,9 @@ const debateAPI = {
    * @param {string} description - Debate description
    * @returns {Promise<object>} - Created debate object
    */
-  create: async (title, description) => {
+  create: async (topic) => {
     return makeRequest('/debates', 'POST', {
-      title,
-      description,
+      topic,
     });
   },
 
