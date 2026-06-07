@@ -22,10 +22,34 @@ const getAIClient = () => {
   return new GoogleGenerativeAI(apiKey);
 };
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 
 const logGeminiEvent = (event, meta) => {
-  console.info(`[Gemini] ${event}`, Object.assign({ model: GEMINI_MODEL }, meta));
+  console.info(`[Gemini] ${event}`, meta);
+};
+
+const executeWithFallback = async (genAI, prompt, generationConfig) => {
+  let lastError;
+  for (const modelName of MODELS_TO_TRY) {
+    try {
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        generationConfig 
+      });
+      console.info(`[Gemini] Attempting request with model: ${modelName}`);
+      const result = await model.generateContent(prompt);
+      return await result.response;
+    } catch (error) {
+      console.warn(`[Gemini] Model ${modelName} failed:`, error.message);
+      lastError = error;
+      // 429 is Too Many Requests, 503 is Service Unavailable. We retry on these.
+      // Other errors might be terminal (e.g. 400 Bad Request), but we'll try fallback just in case.
+      if (error.status === 400 || error.status === 401 || error.status === 403) {
+        throw error; // Auth or Bad Request errors won't be fixed by changing models
+      }
+    }
+  }
+  throw lastError;
 };
 
 export const aiService = {
@@ -33,17 +57,13 @@ export const aiService = {
   /**
    * Generates a conversational response from the AI.
    * @param {Array} history - The chat history
-   * @param {String} personaId - The ID of the personality (e.g., 'einstein')
+   * @param {String} personaId - The ID of the personality (e.g., 'coach')
    * @param {String} currentTopic - The topic of the debate
    * @param {String} userMessage - The latest user message
    */
   generateDebateResponse: async (history, personaId, currentTopic, userMessage) => {
     const genAI = getAIClient();
-    const model = genAI.getGenerativeModel({ 
-      model: GEMINI_MODEL,
-      generationConfig: { temperature: 0.7 } 
-    });
-
+    
     const persona = getPersonality(personaId);
     const fullPrompt = buildDebatePrompt(persona, history, currentTopic, userMessage);
 
@@ -55,8 +75,7 @@ export const aiService = {
     });
 
     try {
-      const result = await model.generateContent(fullPrompt);
-      const response = await result.response;
+      const response = await executeWithFallback(genAI, fullPrompt, { temperature: 0.7 });
       const text = response.text();
 
       console.info('[Gemini] generateDebateResponse.success', {
@@ -65,7 +84,6 @@ export const aiService = {
       return text;
     } catch (error) {
       console.error('AI Service Error (generateDebateResponse):', error.message || error);
-      console.error('Full error stack:', error);
       throw new Error(`Gemini generateDebateResponse failed: ${error.message || error}`);
     }
   },
@@ -75,10 +93,6 @@ export const aiService = {
    */
   evaluateDebate: async (messages) => {
     const genAI = getAIClient();
-    const model = genAI.getGenerativeModel({ 
-      model: GEMINI_MODEL,
-      generationConfig: { temperature: 0.0 }
-    });
 
     const historyText = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
     const prompt = `You are an expert debate judge and logician.
@@ -106,8 +120,8 @@ Evaluate the User's performance. You must return your evaluation strictly as a v
     });
 
     try {
-      const result = await model.generateContent(prompt);
-      const text = await result.response.text();
+      const response = await executeWithFallback(genAI, prompt, { temperature: 0.0 });
+      const text = response.text();
 
       console.info('[Gemini] evaluateDebate.success', {
         responseLength: text.length,
@@ -132,10 +146,6 @@ Evaluate the User's performance. You must return your evaluation strictly as a v
    */
   generateTopics: async (category) => {
     const genAI = getAIClient();
-    const model = genAI.getGenerativeModel({ 
-      model: GEMINI_MODEL,
-      generationConfig: { temperature: 0.9 }
-    });
 
     const prompt = `Generate 5 highly controversial and interesting debate topics in the category of "${category}".
 Return as a JSON array of strings only, no other text. Example: ["Topic 1", "Topic 2"]`;
@@ -146,8 +156,8 @@ Return as a JSON array of strings only, no other text. Example: ["Topic 1", "Top
     });
 
     try {
-      const result = await model.generateContent(prompt);
-      const text = await result.response.text();
+      const response = await executeWithFallback(genAI, prompt, { temperature: 0.9 });
+      const text = response.text();
 
       console.info('[Gemini] generateTopics.success', {
         responseLength: text.length,

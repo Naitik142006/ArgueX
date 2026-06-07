@@ -57,7 +57,8 @@ export const addMessage = async (req, res) => {
     throw new Error('Message text is required');
   }
 
-  debate.messages.push({ sender: 'User', text });
+  const username = req.user.username || req.user.name || 'User';
+  debate.messages.push({ sender: username, text });
   await debate.save();
 
   res.status(201).json(debate);

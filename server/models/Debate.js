@@ -34,7 +34,7 @@ const debateSchema = mongoose.Schema(
     },
     aiPersona: {
       type: String,
-      default: 'einstein',
+      default: 'coach',
     },
     status: {
       type: String,

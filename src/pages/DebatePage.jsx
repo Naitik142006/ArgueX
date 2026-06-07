@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { Swords, Zap } from 'lucide-react';
 import { createDebateRequest, addDebateMessageRequest, requestAIReply } from '../services/debateService.js';
+import { debateAPI } from '../services/api.js';
 import MessageItem from '../components/MessageItem.jsx';
 import DebateStatistics from '../components/DebateStatistics.jsx';
 import MessageThread from '../components/MessageThread.jsx';
+import Button from '../components/ui/Button.jsx';
 import { useSocket } from '../hooks/useSocket.js';
-import '../styles/DebatePage.css';
+import { useAuth } from '../context/AuthContext.jsx';
 
 /**
  * Normalize a debate-API message into the shape MessageItem expects.
@@ -37,9 +41,35 @@ function DebatePage() {
   const [showStats, setShowStats] = useState(false);
   const [threadMessage, setThreadMessage] = useState(null);
 
+  const { urlDebateId } = useParams();
+  const { user: currentUser } = useAuth();
+
   // Get token for socket connection
   const token = window.localStorage.getItem('token');
   const { socket, isConnected } = useSocket(token);
+
+  // Load debate if ID is provided in URL
+  useEffect(() => {
+    if (urlDebateId) {
+      setDebateId(urlDebateId);
+      debateAPI.getById(urlDebateId)
+        .then(data => {
+          if (data && data.topic) {
+            setTopic(data.topic);
+            setMessages((data.messages || []).map((m, i) => normalizeMessage(m, i)));
+          }
+        })
+        .catch(err => {
+          console.error("Failed to load existing debate:", err);
+          setError("Failed to load the selected debate.");
+        });
+    } else {
+      // Reset state if navigating to new debate
+      setDebateId(null);
+      setTopic('AI in education');
+      setMessages([]);
+    }
+  }, [urlDebateId]);
 
   // Join socket room when debate starts
   useEffect(() => {
@@ -235,82 +265,83 @@ function DebatePage() {
   };
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-12">
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-8 shadow-xl shadow-slate-950/20">
-        {/* Header */}
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-indigo-300">
-              Debate room
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold text-white">
-              Topic: {topic}
-            </h1>
-            <p className="text-slate-400">
-              Opponent: ArgueX AI coach
-              {isConnected && (
-                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-emerald-400" title="Socket connected" />
-              )}
-            </p>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col h-[calc(100vh-64px)]">
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-brand-500/10 text-brand-500 dark:text-brand-400 rounded-xl">
+              <Zap size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-heading font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                Debate Arena
+                {isConnected && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_1px_rgba(16,185,129,0.5)]" title="Connected" />
+                )}
+              </h1>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                Opponent: <span className="font-medium text-brand-600 dark:text-brand-400">ArgueX AI Coach</span>
+                {debateId && <span className="ml-2 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-xs">ID: {debateId.substring(0,6)}...</span>}
+              </p>
+            </div>
           </div>
-          <button
-            type="button"
+
+          <Button
+            variant={showStats ? 'primary' : 'outline'}
             onClick={() => setShowStats((s) => !s)}
-            className="rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition"
           >
-            {showStats ? 'Hide Stats' : '📊 Show Stats'}
-          </button>
+            {showStats ? 'Hide Stats' : 'Show Stats'}
+          </Button>
         </div>
 
-        <div className="space-y-4">
-          {/* Topic & ID */}
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <input
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="Choose a topic for your debate"
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-            />
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/90 px-4 py-3 text-sm text-slate-300">
-              Debate ID: {debateId ?? 'not started'}
-            </div>
-          </div>
+        <div className="flex gap-3">
+          <input
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            disabled={!!debateId}
+            placeholder="What would you like to debate about?"
+            className="flex-1 px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-60 transition-all"
+          />
+        </div>
+      </div>
 
-          {/* Status banners */}
-          {error && (
-            <div className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-              {error}
-            </div>
-          )}
-          {status && (
-            <div className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-              {status}
-            </div>
-          )}
+      {error && (
+        <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm font-medium">
+          {error}
+        </div>
+      )}
 
-          {/* Statistics panel (toggle) */}
-          {showStats && debateId && (
-            <DebateStatistics
-              roomId={debateId}
-              socket={socket}
-              currentUser="You"
-              apiPath="/api/debates"
-            />
-          )}
+      {showStats && debateId && (
+        <div className="mb-6">
+          <DebateStatistics
+            roomId={debateId}
+            socket={socket}
+            currentUser={currentUser}
+            apiPath="/api/debates"
+          />
+        </div>
+      )}
 
-          {/* Messages area */}
-          <div className="max-h-[420px] space-y-3 overflow-y-auto rounded-3xl border border-slate-800 bg-slate-950/90 p-5">
-            {messages.length === 0 && (
-              <p className="text-center text-sm text-slate-500">
-                No messages yet. Start the debate!
-              </p>
-            )}
-            {messages.map((message) => (
+      {/* Chat Area */}
+      <div className="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl flex flex-col overflow-hidden shadow-sm">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 smooth-scroll">
+          {messages.length === 0 ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center max-w-sm">
+                <div className="w-16 h-16 mx-auto bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-4">
+                  <Swords size={32} />
+                </div>
+                <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">Ready to debate?</h3>
+                <p className="text-zinc-500 dark:text-zinc-400 text-sm">Set a topic above and send your first argument. The AI coach will evaluate your logic and respond.</p>
+              </div>
+            </div>
+          ) : (
+            messages.map((message) => (
               <MessageItem
                 key={message._id}
                 message={message}
-                currentUser={{ id: 'You', username: 'You' }}
-                isOwn={message.userName === 'You'}
+                currentUser={currentUser}
+                isOwn={message.userName === currentUser?.username || message.userName === currentUser?.name || message.userName === 'User' || message.userName === 'Unknown' || message.userName === 'You'}
                 onReply={handleReply}
                 onAddReaction={handleAddReaction}
                 onRemoveReaction={handleRemoveReaction}
@@ -319,43 +350,54 @@ function DebatePage() {
                 onPin={handlePin}
                 onShowThread={handleShowThread}
               />
-            ))}
-            {isAITyping && (
-              <div className="rounded-3xl bg-slate-800 px-4 py-3 text-slate-300">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  AI Coach
-                </p>
-                <div className="mt-2 flex items-center space-x-2">
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-slate-500 [animation-delay:-0.3s]" />
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-slate-500 [animation-delay:-0.15s]" />
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-slate-500" />
-                </div>
-              </div>
-            )}
-          </div>
+            ))
+          )}
 
-          {/* Compose bar */}
-          <div className="flex flex-col gap-3 rounded-3xl border border-slate-800 bg-slate-900/95 p-4 sm:flex-row sm:items-center">
-            <input
+          {isAITyping && (
+            <div className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold text-white">AI</span>
+              </div>
+              <div className="bg-zinc-100 dark:bg-zinc-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-bounce-1" />
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-bounce-2" />
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-bounce-3" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4 bg-zinc-50 dark:bg-zinc-950/50 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex gap-3">
+            <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              placeholder="Type your argument..."
-              className="min-h-[56px] flex-1 rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              placeholder="Construct your argument..."
+              className="flex-1 max-h-32 min-h-[52px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none smooth-scroll transition-all"
+              rows={1}
             />
-            <button
-              type="button"
+            <Button
               onClick={handleSend}
-              disabled={isAITyping}
-              className="rounded-2xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:opacity-50"
+              disabled={isAITyping || !draft.trim()}
+              variant="brand"
+              className="h-[52px] px-6 shrink-0"
             >
               Send
-            </button>
+            </Button>
           </div>
+          <p className="text-[10px] text-zinc-400 mt-2 text-center">
+            ArgueX AI may produce inaccurate information. Press Enter to send, Shift+Enter for new line.
+          </p>
         </div>
       </div>
 
-      {/* Thread modal */}
       {threadMessage && (
         <MessageThread
           message={threadMessage}
@@ -366,8 +408,7 @@ function DebatePage() {
           onAddReaction={handleAddReaction}
         />
       )}
-    </section>
+    </div>
   );
 }
-
 export default DebatePage;

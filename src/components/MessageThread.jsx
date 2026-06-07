@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import '../styles/MessageThread.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, MessageSquareQuote, ChevronRight } from 'lucide-react';
+import Button from './ui/Button.jsx';
+import Avatar from './ui/Avatar.jsx';
+import Badge from './ui/Badge.jsx';
 
-/**
- * Message Thread Component
- * 
- * Displays parent message and all threaded replies
- * Allows replying within the thread
- */
 export default function MessageThread({
   message,
   roomId,
@@ -18,22 +16,16 @@ export default function MessageThread({
   const [replies, setReplies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState('');
-  const [selectedPosition, setSelectedPosition] = useState('neutral');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    /**
-     * Fetch thread replies
-     */
     const fetchThread = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(
           `/api/chat/rooms/${roomId}/threads/${message._id}`,
           {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
+            headers: { 'Authorization': `Bearer ${token}` },
           }
         );
 
@@ -47,43 +39,32 @@ export default function MessageThread({
         setLoading(false);
       }
     };
-
     fetchThread();
   }, [message._id, roomId]);
 
-  /**
-   * Handle reply submission
-   */
   const handleSubmitReply = async (e) => {
     e.preventDefault();
-
-    if (!replyText.trim()) {
-      return;
-    }
+    if (!replyText.trim()) return;
 
     setIsSubmitting(true);
-
     try {
-      // Emit to socket (real-time)
       onSendReply({
         parentId: message._id,
         message: replyText,
-        position: selectedPosition,
+        position: 'neutral',
       });
 
-      // Add to local state optimistically
       const newReply = {
         _id: Date.now().toString(),
         author: currentUser?.username || 'You',
         message: replyText,
-        position: selectedPosition,
+        position: 'neutral',
         timestamp: new Date(),
         reactions: new Map(),
       };
 
       setReplies([...replies, newReply]);
       setReplyText('');
-      setSelectedPosition('neutral');
     } catch (error) {
       console.error('Error sending reply:', error);
     } finally {
@@ -91,175 +72,136 @@ export default function MessageThread({
     }
   };
 
-  /**
-   * Get sentiment color
-   */
-  const getSentimentColor = (sentiment) => {
-    if (!sentiment) return 'neutral';
-    switch (sentiment.label) {
-      case 'POSITIVE':
-        return 'positive';
-      case 'NEGATIVE':
-        return 'negative';
-      default:
-        return 'neutral';
-    }
-  };
-
   return (
-    <div className="message-thread-overlay">
-      <div className="message-thread-container">
-        {/* Header */}
-        <div className="thread-header">
-          <h3>💬 Message Thread</h3>
-          <button className="close-button" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex justify-end">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        />
 
-        {/* Thread content */}
-        <div className="thread-content">
-          {/* Parent message */}
-          <div className="parent-message-section">
-            <div className="parent-label">Original Message</div>
-
-            <div className="parent-message">
-              <div className="parent-author">{message.userName}</div>
-
-              {message.position && (
-                <span className={`parent-position ${message.position}`}>
-                  {message.position.toUpperCase()}
-                </span>
-              )}
-
-              <div className="parent-text">{message.message}</div>
-
-              {message.sentiment && (
-                <div
-                  className={`sentiment-indicator ${getSentimentColor(
-                    message.sentiment
-                  )}`}
-                >
-                  {message.sentiment.label}
-                </div>
-              )}
-
-              <div className="parent-time">
-                {new Date(message.createdAt).toLocaleString()}
-              </div>
-            </div>
+        {/* Sidebar */}
+        <motion.div
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="relative w-full sm:w-[400px] h-full bg-white dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
+            <h2 className="text-lg font-heading font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
+              <MessageSquareQuote size={20} className="text-brand-500" />
+              Thread
+            </h2>
+            <button
+              onClick={onClose}
+              className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+            >
+              <X size={20} />
+            </button>
           </div>
 
-          {/* Divider */}
-          <div className="thread-divider" />
-
-          {/* Replies */}
-          <div className="replies-section">
-            <div className="replies-label">
-              {replies.length === 0
-                ? 'No replies yet'
-                : `${replies.length} ${replies.length === 1 ? 'Reply' : 'Replies'}`}
-            </div>
-
-            {loading ? (
-              <div className="replies-loading">Loading replies...</div>
-            ) : replies.length > 0 ? (
-              <div className="replies-list">
-                {replies.map((reply) => (
-                  <div key={reply._id} className="reply-item">
-                    <div className="reply-header">
-                      <span className="reply-author">{reply.author}</span>
-
-                      {reply.position && (
-                        <span className={`reply-position ${reply.position}`}>
-                          {reply.position.toUpperCase()}
-                        </span>
-                      )}
-
-                      <span className="reply-time">
-                        {new Date(reply.timestamp).toLocaleTimeString(
-                          'en-US',
-                          {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="reply-message">{reply.message}</div>
-
-                    {reply.sentiment && (
-                      <div
-                        className={`sentiment-indicator ${getSentimentColor(
-                          reply.sentiment
-                        )} small`}
-                      >
-                        {reply.sentiment.label}
-                      </div>
-                    )}
-
-                    {/* Reactions on reply */}
-                    {reply.reactions && reply.reactions.size > 0 && (
-                      <div className="reply-reactions">
-                        {Array.from(reply.reactions.entries()).map(
-                          ([emoji, users]) => (
-                            <span key={emoji} className="reply-reaction-badge">
-                              {emoji} {users.length}
-                            </span>
-                          )
-                        )}
-                      </div>
-                    )}
+          <div className="flex-1 overflow-y-auto smooth-scroll">
+            {/* Original Message */}
+            <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30">
+              <div className="flex items-start gap-3">
+                <Avatar name={message.userName} size="sm" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-sm text-zinc-900 dark:text-white">
+                      {message.userName}
+                    </span>
+                    <span className="text-[10px] text-zinc-500">
+                      {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
-                ))}
+                  <div className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+                    {message.message}
+                  </div>
+                </div>
               </div>
-            ) : null}
+            </div>
+
+            {/* Replies */}
+            <div className="p-5">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+                <span className="text-xs font-medium text-zinc-400">
+                  {replies.length} {replies.length === 1 ? 'Reply' : 'Replies'}
+                </span>
+                <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+              </div>
+
+              {loading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex gap-3">
+                      <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
+                      <div className="flex-1 space-y-2 py-1">
+                        <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                        <div className="h-10 w-full bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : replies.length > 0 ? (
+                <div className="space-y-5">
+                  {replies.map((reply) => (
+                    <div key={reply._id} className="flex items-start gap-3">
+                      <Avatar name={reply.author} size="sm" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm text-zinc-900 dark:text-white">
+                            {reply.author}
+                          </span>
+                          <span className="text-[10px] text-zinc-500">
+                            {new Date(reply.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 p-3 rounded-2xl rounded-tl-sm">
+                          {reply.message}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-sm text-zinc-500 py-8">
+                  No replies yet. Be the first to start the discussion!
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Reply form */}
-          <form onSubmit={handleSubmitReply} className="reply-form">
-            <div className="form-label">Add your reply</div>
-
-            <div className="reply-form-content">
+          {/* Reply Input */}
+          <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+            <form onSubmit={handleSubmitReply} className="flex flex-col gap-3">
               <textarea
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
-                placeholder="Type your reply..."
-                className="reply-input"
-                rows={3}
+                placeholder="Reply to thread..."
                 disabled={isSubmitting}
+                className="w-full max-h-32 min-h-[80px] px-4 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none smooth-scroll transition-all"
               />
-
-              <div className="form-controls">
-                <div className="position-selector">
-                  <label>Position:</label>
-                  <select
-                    value={selectedPosition}
-                    onChange={(e) => setSelectedPosition(e.target.value)}
-                    disabled={isSubmitting}
-                  >
-                    <option value="pro">Pro</option>
-                    <option value="con">Con</option>
-                    <option value="neutral">Neutral</option>
-                  </select>
-                </div>
-
-                <button
+              <div className="flex justify-end">
+                <Button
                   type="submit"
                   disabled={!replyText.trim() || isSubmitting}
-                  className="submit-button"
+                  variant="brand"
+                  loading={isSubmitting}
                 >
-                  {isSubmitting ? 'Sending...' : 'Send Reply'}
-                </button>
+                  Send Reply
+                </Button>
               </div>
-            </div>
-          </form>
-        </div>
+            </form>
+          </div>
+        </motion.div>
       </div>
-
-      {/* Overlay click to close */}
-      <div className="thread-overlay-bg" onClick={onClose} />
-    </div>
+    </AnimatePresence>
   );
 }

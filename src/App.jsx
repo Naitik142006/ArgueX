@@ -33,6 +33,14 @@ function App() {
           }
         />
         <Route
+          path="debate/:urlDebateId"
+          element={
+            <ProtectedRoute>
+              <DebatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="profile"
           element={
             <ProtectedRoute>

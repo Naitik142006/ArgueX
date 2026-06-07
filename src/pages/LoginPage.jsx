@@ -1,173 +1,157 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import InputField from '../components/Form/InputField.jsx';
+import { motion } from 'framer-motion';
+import { Mail, Lock, ShieldCheck, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import Input from '../components/ui/Input.jsx';
+import Button from '../components/ui/Button.jsx';
 
-/**
- * LoginPage Component
- * 
- * Handles user authentication (logging in).
- * 
- * Flow:
- * 1. User enters email and password
- * 2. Frontend validates (both filled, email has @)
- * 3. If valid: make API call to backend
- * 4. Backend verifies credentials against MongoDB
- * 5. Backend returns token if valid, error if not
- * 6. Frontend stores token in localStorage
- * 7. Frontend redirects to dashboard
- * 8. User is now logged in!
- */
-function LoginPage() {
-  // Get login method from auth context
+export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // State Management
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  /**
-   * handleChange: Update form state as user types
-   * Clear errors when user starts typing again
-   */
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (error) setError('');
-    if (message) setMessage('');
   };
 
-  /**
-   * handleSubmit: Process login when user clicks "Login"
-   */
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    // FRONTEND VALIDATION (Fast, no network)
-    if (!form.email.trim()) {
-      setError('Email is required');
+    if (!form.email.trim() || !form.password) {
+      setError('Please fill in all fields');
       return;
     }
 
-    if (!form.password) {
-      setError('Password is required');
-      return;
-    }
-
-    if (!form.email.includes('@')) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    // API CALL (Make network request)
     try {
       setIsLoading(true);
       setError('');
-      setMessage('');
-
-      const data = await login({
+      await login({
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
-
-      // Token already stored automatically
-      setMessage('✅ Login successful! Redirecting...');
-      
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 800);
-
+      navigate('/dashboard');
     } catch (err) {
+      if (err.status === 401) setError('Invalid email or password');
+      else setError(err.message || 'Login failed. Please try again.');
       setIsLoading(false);
-      
-      // Show appropriate error based on what failed
-      if (err.status === 401) {
-        setError('Invalid email or password');
-      } else if (err.status === 400) {
-        setError(err.message || 'Please check your credentials');
-      } else if (err.message === 'Failed to fetch') {
-        setError('Cannot connect to server. Is the backend running?');
-      } else {
-        setError(err.message || 'Login failed. Please try again.');
-      }
     }
   };
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-12">
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-10 shadow-xl shadow-slate-950/30">
-        <div className="mb-8 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-indigo-300">Welcome Back</p>
-          <h1 className="mt-4 text-4xl font-semibold text-white">Access your dashboard</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-slate-400">
-            Login to continue your debates and join the discussion.
+    <div className="min-h-[calc(100vh-64px)] flex">
+      {/* Left Panel: Branding / Art */}
+      <div className="hidden lg:flex flex-1 flex-col justify-between bg-zinc-900 relative overflow-hidden p-12">
+        <div className="absolute inset-0 bg-grid opacity-10 pointer-events-none" />
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-brand-500/20 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent-500/20 blur-[100px] rounded-full pointer-events-none" />
+
+        <div className="relative z-10 max-w-md">
+          <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-md border border-white/10">
+            <ShieldCheck className="text-brand-300" size={24} />
+          </div>
+          <h2 className="text-4xl font-heading font-bold text-white leading-tight mb-6">
+            Log in to continue your debate journey.
+          </h2>
+          <p className="text-zinc-400 text-lg">
+            ArgueX is the ultimate arena for intellectual growth. Engage with AI, climb the ranks, and sharpen your mind.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <InputField
-            label="Email"
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="you@example.com"
-            disabled={isLoading}
-          />
-
-          <InputField
-            label="Password"
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            disabled={isLoading}
-          />
-
-          {error && (
-            <div className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200" role="alert">
-              ❌ {error}
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex -space-x-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-zinc-900 bg-zinc-800 flex items-center justify-center text-xs text-zinc-500 overflow-hidden">
+                  <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${i}&backgroundColor=transparent`} alt="avatar" />
+                </div>
+              ))}
             </div>
-          )}
-          {message && (
-            <div className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200" role="status">
-              {message}
+            <div className="text-sm">
+              <p className="text-white font-medium">Join 2,000+ debaters</p>
+              <p className="text-zinc-500">Active globally right now</p>
             </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full rounded-2xl px-5 py-3 text-base font-semibold text-white transition ${
-              isLoading
-                ? 'bg-slate-600 cursor-not-allowed opacity-50'
-                : 'bg-indigo-500 hover:bg-indigo-400'
-            }`}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                Logging in...
-              </span>
-            ) : (
-              'Login'
-            )}
-          </button>
-        </form>
-
-        <p className="mt-8 text-center text-sm text-slate-400">
-          Don't have an account?{' '}
-          <Link to="/signup" className="font-semibold text-indigo-300 hover:text-indigo-200">
-            Create one now
-          </Link>
-        </p>
+          </div>
+        </div>
       </div>
-    </section>
+
+      {/* Right Panel: Form */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-white dark:bg-zinc-950">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md"
+        >
+          <div className="mb-10 text-center lg:text-left">
+            <h1 className="text-3xl font-heading font-bold text-zinc-900 dark:text-white mb-3">
+              Welcome back
+            </h1>
+            <p className="text-zinc-600 dark:text-zinc-400">
+              Please enter your details to sign in.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              label="Email address"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              icon={<Mail size={18} />}
+              value={form.email}
+              onChange={handleChange}
+              disabled={isLoading}
+            />
+
+            <Input
+              label="Password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              icon={<Lock size={18} />}
+              value={form.password}
+              onChange={handleChange}
+              disabled={isLoading}
+            />
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm font-medium flex items-start gap-2"
+              >
+                <ShieldCheck className="shrink-0 mt-0.5" size={16} />
+                <p>{error}</p>
+              </motion.div>
+            )}
+
+            <div className="pt-2">
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                loading={isLoading}
+              >
+                Sign In
+              </Button>
+            </div>
+          </form>
+
+          <p className="mt-8 text-center text-zinc-600 dark:text-zinc-400">
+            Don't have an account?{' '}
+            <Link to="/signup" className="font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-500 transition-colors">
+              Sign up
+            </Link>
+          </p>
+        </motion.div>
+      </div>
+    </div>
   );
 }
-
-export default LoginPage;

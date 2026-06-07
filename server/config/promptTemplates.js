@@ -25,7 +25,7 @@ const MAX_CONTEXT_MESSAGES = 10;
 export const buildDebatePrompt = (persona, history, currentTopic, userMessage) => {
   // 1. SYSTEM PROMPT (The Invisible Instructions)
   let prompt = `SYSTEM INSTRUCTIONS:
-${persona.basePrompt}
+${persona.systemPrompt || persona.basePrompt}
 
 CRITICAL RULES:
 1. You are debating the topic: "${currentTopic}". Stay strictly on topic.
@@ -47,7 +47,9 @@ CRITICAL RULES:
     
     trimmedHistory.forEach(msg => {
       // Differentiate between User and AI in the history
-      const role = msg.sender === 'User' ? 'User' : persona.name;
+      // If the sender is the persona ID or persona Name, it's the AI. Otherwise, it's the human user.
+      const isAI = msg.sender === persona.id || msg.sender === persona.name || msg.sender === 'ArgueX AI Coach' || msg.sender === 'einstein';
+      const role = isAI ? persona.name : msg.sender;
       prompt += `${role}: ${msg.text}\n`;
     });
   }
@@ -55,7 +57,7 @@ CRITICAL RULES:
   prompt += `-------------------------------------\n\n`;
 
   // 3. USER PROMPT (The immediate input to respond to)
-  prompt += `LATEST USER MESSAGE:\nUser: ${userMessage}\n\n`;
+  prompt += `LATEST USER MESSAGE:\nHuman: ${userMessage}\n\n`;
   prompt += `Now, generate your response as ${persona.name}:`;
 
   return prompt;

@@ -39,14 +39,18 @@ export const generateReply = async (req, res) => {
   // Call AI Service
   const aiResponseText = await aiService.generateDebateResponse(
     debate.messages,
-    debate.aiPersona || 'einstein',
+    debate.aiPersona || 'coach',
     debate.topic,
     lastMessage.text
   );
 
   // Add AI response to the database
+  const finalSender = (!debate.aiPersona || debate.aiPersona === 'coach' || debate.aiPersona === 'einstein') 
+    ? 'ArgueX AI Coach' 
+    : debate.aiPersona;
+
   debate.messages.push({
-    sender: debate.aiPersona || 'einstein',
+    sender: finalSender,
     text: aiResponseText
   });
 
