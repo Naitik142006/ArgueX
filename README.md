@@ -1,338 +1,116 @@
-# ArgueX — Full Stack Debate Platform
+# ArgueX — The AI-Powered Multiplayer Debate Platform
 
-ArgueX is an AI-powered debate app. Phase 1 built the frontend UI using React, Tailwind CSS, and React Router. Phase 2 adds the backend foundation with Node.js, Express, MongoDB, Mongoose, JWT authentication, and protected debate APIs.
+ArgueX is a next-generation debate platform that combines **WebRTC Mesh Networking**, **Decentralized Speech Recognition**, and **Google Gemini AI** to create immersive 1v1 and Group Debates. 
 
-## Phase 1 — Frontend Prototype
+Whether you want to train against historical AI personas or invite up to 5 friends for a live video debate judged by an AI, ArgueX provides the ultimate battleground for ideas.
 
-This project includes:
+![ArgueX Dashboard](https://img.shields.io/badge/Status-Active_Development-brand) ![React](https://img.shields.io/badge/React-18-blue) ![Node.js](https://img.shields.io/badge/Node.js-Backend-green) ![WebRTC](https://img.shields.io/badge/WebRTC-P2P_Mesh-orange)
 
-- Multiple connected pages: Landing, Login, Signup, Dashboard, Debate, Profile
-- Reusable UI components like Navbar and InputField
-- Routing using `react-router-dom`
-- Tailwind CSS styling and responsive layout
+---
 
-### Frontend tech stack
+## 🚀 Key Features
 
+### 🤖 Train Against AI Personas
+- Debate against powerful LLM-driven personas (e.g., The Logical Spock, The Emotional Artist, The Aggressive Challenger).
+- Uses Google Gemini to generate dynamic, contextual, and persona-driven arguments in real-time.
+- Built-in **AI Judge** evaluates your logic, evidence, and persuasion, declaring a winner and providing constructive feedback.
+
+### 🎥 N-Way Group Video Debates (WebRTC Mesh)
+- **Peer-to-Peer Mesh Network**: Play with up to 6 participants simultaneously without needing expensive central video servers (SFU). Video and audio are tunneled directly between browsers!
+- **Dynamic Grid UI**: The video arena automatically scales from 1v1 split-screen to a full 3x2 grid as more friends join via invite links.
+- **Hardware Optimized**: Intelligent connection management prevents memory leaks and manages device hardware efficiently.
+
+### 🎙️ Live Decentralized Transcription & Judging
+- **Local Speech-to-Text**: Uses your browser's native Web Speech API to transcribe your voice locally, preventing backend bottlenecking.
+- **Socket Transcript Pipeline**: Completed sentences are beamed to the server and broadcasted to the room, creating a live scrolling chat transcript of the video call.
+- **Group AI Verdict**: When the debate concludes, the master transcript is analyzed by Gemini. Every participant is ranked (1st to Last place) and receives an individual Logic Score and feedback on their arguments.
+
+### 🏆 Elo Ratings & Leaderboards
+- Every time you debate against the AI or humans, your performance impacts your global Elo rating.
+- Climb the global leaderboard and track your win/loss statistics on your profile.
+
+### ⏪ Debate Replays
+- Access a historical archive of all your past debates.
+- Review transcripts, re-read the AI's feedback, and analyze your logical fallacies to improve your skills.
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend:**
 - React (Vite)
-- Tailwind CSS
-- React Router
+- Tailwind CSS (Custom Design System & Glassmorphism)
+- React Router (Protected Routing)
+- WebRTC API (MediaStreams & RTCPeerConnections)
+- Web Speech API (Live Transcription)
 
-### Frontend quickstart
+**Backend:**
+- Node.js & Express.js
+- Socket.io (Signaling Server & Live Transcripts)
+- MongoDB Atlas & Mongoose (Schema Validation)
+- Google Gemini API (AI Persona Generation & Transcript Judging)
+- JWT (Authentication)
 
-From the repository root:
+---
 
-```bash
-npm install
-npm run dev
-```
+## 🏁 Quickstart
 
-Then open the local address shown by Vite, usually `http://localhost:5173`.
+### 1. Backend Setup
 
-## Phase 2 — Backend Foundation
-
-
-
-A new backend is added in the server/ folder to support authentication, debate creation, and message history.
-
-### Backend tech stack
-
-
-
-- Node.js
-- Express.js
-- MongoDB Atlas
-- Mongoose
-- bcryptjs
-- jsonwebtoken
-- dotenv
-- cors
-- nodemon
-
-### Backend folder structure
-
-- server/server.js — Express application entry point
-- server/config/db.js — MongoDB connection logic
-- server/models/ — Mongoose schemas (User.js, Debate.js)
-- server/controllers/ — Route handlers and business logic
-- server/routes/ — API endpoints for auth and debates
-- server/middleware/ — Authentication and error handling middleware
-- server/.env.example — Example environment configuration
-
-This structure separates concerns so the backend is easier to understand and extend.
-
-### Backend quickstart
-
-From the `server/` folder:
+From the repository root, navigate to the `server/` folder:
 
 ```bash
 cd server
 npm install
 ```
 
-Create a `.env` file in `server/` from `.env.example` and set:
+Create a `.env` file in `server/` (use `.env.example` as a template) and add the following:
 
-- MONGO_URI — your MongoDB Atlas connection string
-- JWT_SECRET — secret key for signing tokens
-- PORT — optional backend port (default 5000)
-- AI_API_KEY — Google Gemini API Key for the debate AI
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+AI_API_KEY=your_google_gemini_api_key
+```
 
-Then run:
+Start the backend:
 
 ```bash
 npm run dev
 ```
 
-The backend should start on `http://localhost:5000`.
+The backend signaling and API server will start on `http://localhost:5000`.
 
-### Backend API overview
+### 2. Frontend Setup
 
-The backend exposes:
+Open a new terminal window, and from the repository root:
 
-- POST /api/auth/signup — register a new user and return a JWT
-- POST /api/auth/login — authenticate a user and return a JWT
-- GET /api/auth/me — return the current authenticated profile (token validation)
-- GET /api/auth/profile — return the current authenticated profile (alternative endpoint)
-- GET /api/debates — list debates for the current user
-- POST /api/debates — create a new debate
-- POST /api/debates/:id/messages — add a message to an existing debate
-
-Protected routes require an Authorization: Bearer <token> header.
-
-## Frontend and backend integration
-
-The frontend now includes service helpers in `src/services/`:
-
-- `src/services/api.js` — common API URL and response handling
-- `src/services/authService.js` — signup and login requests
-- `src/services/debateService.js` — create debate and add messages
-
-The React pages are wired to call backend APIs so the app becomes a full-stack experience.
-
-## What you learn in Phase 2
-
-- How a backend server handles HTTP requests
-- How APIs connect frontend and backend
-- How MongoDB stores users, debates, and messages
-- How authentication tokens protect routes
-- How the frontend sends JSON and receives responses
-- How to structure backend folders professionally
-
-## Phase 3 — Real Authentication Integration
-
-ArgueX now has **REAL AUTHENTICATION**! 🎉 The frontend has been seamlessly integrated with the secure backend APIs to create a professional, robust, and secure full-stack experience.
-
-### Key Takeaways
-* ✅ **Global Auth State (`AuthContext.jsx`)** — No prop drilling needed! Authentication state and user details are globally managed and accessible by any component in the application.
-* ✅ **Automatic Token Storage** — User JSON Web Tokens (JWT) and profile data are automatically saved in `localStorage` upon successful login or signup.
-* ✅ **Session Restoration & Persistence** — Users stay logged in. The app automatically verifies and restores user sessions upon refresh or reopening the browser.
-* ✅ **Protected Routes (`ProtectedRoute.jsx`)** — Unauthenticated users attempting to access private routes like `/dashboard`, `/debate`, or `/profile` are dynamically blocked and securely redirected to `/login`.
-* ✅ **Dynamic UI (`Navbar.jsx`)** — The navigation bar dynamically adapts to the user's login state. If logged out, it exhibits sleek *Login* and *Signup* buttons. If logged in, it shows the *Dashboard* link, user profile link, and a *Logout* action.
-* ✅ **Professional UX** — Zero-flicker transitions, animated loading states, and smooth session restorations create a premium user experience.
-* ✅ **Scalable Architecture** — Built with clean abstraction layers, making it extremely easy to add more authenticated features or endpoints.
-
-### You've Now Built:
-1. **API Layer (`api.js`)** — A unified, robust request utility with centralized configuration, custom error logging, and automatic authorization token injection.
-2. **Signup Flow (frontend + backend)** — Complete input collection, backend validation, password hashing with `bcryptjs`, database persistence in MongoDB, and automatic logging in post-signup.
-3. **Login Flow (frontend + backend)** — Form submission, secure token verification, error display, and instant state transition.
-4. **Global Auth State (Context)** — A top-level `<AuthProvider>` wrapper exposing state fields (`user`, `isLoggedIn`, `isLoading`, `error`) and actions (`login`, `signup`, `logout`) via a custom `useAuth()` hook.
-5. **Route Protection** — Wrapper component that guards secure pages from unauthorized entry.
-6. **Session Persistence** — Automatic localStorage-token validation against the backend `/api/auth/me` route at app startup.
-7. **Dynamic UI** — Interactive header component that instantly shifts depending on login context.
-
-### Folder Structure (Phase 3 Additions)
-
-- `src/context/AuthContext.jsx` — Global state container, initialization logic, and custom hook `useAuth()`
-- `src/components/ProtectedRoute.jsx` — High-Order Component (HOC) guarding private pages
-- `src/components/Navbar.jsx` — State-aware main header component
-- `src/services/api.js` — Centralized API call library handling endpoints, methods, payloads, and JWT insertion
-- `src/services/authService.js` — Helper functions for signup, login, profile queries, and token persistence
-
-## What you learn in Phase 3
-
-- **State Management**: Managing state globally across multiple disjointed pages without passing props through intermediate components.
-- **Session Lifecycles**: How to handle persistent user authorization securely, token validation sequences, and graceful storage management.
-- **Router Guards**: Protecting specific path boundaries in SPA routers.
-- **Advanced HTTP Services**: Structuring custom API managers that encapsulate headers, endpoints, request methods, and standardized response interception.
-
-## Running the full app
-
-To launch the full-stack app, follow these steps:
-
-### 1. Start the Backend
-From the repository root:
 ```bash
-cd server
+npm install
 npm run dev
 ```
-The backend should start on `http://localhost:5000`. Make sure you have created your `server/.env` file with proper `MONGO_URI` and `JWT_SECRET`.
 
-### 2. Start the Frontend
-From the repository root (in a separate terminal window):
-```bash
-npm run dev
-```
-Open the local address shown by Vite, usually `http://localhost:5173`.
-
-> 💡 **Tip**: Make sure the backend is fully running before attempting to signup or log in from the frontend!
-
-## Recent Updates (Phase 3 Complete)
-
-✅ **Fixed Syntax Error in SignupPage.jsx** — Removed duplicate closing code that was causing parser errors
-
-✅ **Enhanced Authentication Endpoints** — Added `/api/auth/me` endpoint for token validation and session restoration
-
-✅ **Unified API Service Layer** — Updated `debateService.js` to use centralized API structure from `api.js`, eliminating code duplication
-
-✅ **Full-Stack Integration Complete** — Frontend and backend now seamlessly communicate through unified service layer
-
-The app is fully functional and ready for development!
-
-## Notes for beginners
-
-- `server.js` starts the Express server and registers routes.
-- `dotenv` keeps secrets out of the code by loading `.env` values.
-- `mongoose.connect()` opens the database connection and creates collections automatically.
-- `bcryptjs` hashes passwords so plain text passwords are never stored.
-- `jsonwebtoken` creates tokens the frontend stores in localStorage for authenticated requests.
-- `authMiddleware.js` verifies the token and attaches `req.user` for protected routes.
-- `AuthContext.jsx` provides a single source of truth for the user's login status across the entire React app.
-- `ProtectedRoute.jsx` intercepts unauthorized page loads and forwards users to `/login`.
-- `api.js` is the centralized HTTP service layer that handles all API communication with automatic token injection
-- `authService.js` and `debateService.js` use the `api.js` layer to make requests, keeping code DRY and maintainable
-
-## Next steps
-
-Now that ArgueX has robust authentication, next phases will explore:
-1. **Debate Creation & AI Responses** — Connecting debate inputs to AI endpoints to get real-time counter-arguments.
-2. **WebSocket Integration** — Real-time debate room synchronization for multi-user experiences.
-3. **Advanced Profile Customization** — Storing and displaying user stats, debate records, and ratings.
-
-
-## Phase 4 — AI Debate Coach Integration
-
-🧠 **What’s new?** The app now includes an AI‑powered debate coach that evaluates arguments in real‑time, provides structured feedback, and suggests improvements. This brings a fully‑interactive, intelligent tutoring experience to ArgueX.
-
-### New Backend Components
-- `server/models/Debate.js` – expanded schema with `aiPersona`, `status`, and `analysis` fields to store AI‑generated insights.
-- `server/services/aiService.js` – thin wrapper around `@google/generative‑ai` that formats prompts, calls the Gemini model, and enforces JSON responses.
-- `server/controllers/aiController.js` – route handlers for:
-  - `POST /api/ai/topics` – generate debate topic suggestions.
-  - `POST /api/ai/:id/reply` – send debate history and get an AI reply.
-  - `POST /api/ai/:id/analyze` – generate structured analysis and scoring for a debate.
-- `server/routes/aiRoutes.js` – registers the AI endpoints and plugs them into the Express app.
-- Updated `server/server.js` to mount `/api/ai`.
-- Added `AI_API_KEY` to `server/.env.example`; create `server/.env` with the key locally.
-
-### New Frontend Services & UI
-- `src/services/api.js` – new `aiAPI` export for calling the AI endpoints.
-- `src/services/debateService.js` – wrapper functions like `requestAIReply(debateId)` and `requestDebateAnalysis(debateId)` that forward debate actions to the backend AI service.
-- `src/components/AnalysisDashboard.jsx` – visual component that renders the AI’s structured feedback with colour‑coded scores and interactive tooltips.
-- `src/pages/DebatePage.jsx` – integrated a typing indicator (`isAITyping`) and automatic fetching of AI analysis after each user turn.
-
-### Usage Flow
-1. User chooses or generates a debate topic.
-2. User submits a message in a debate.
-3. Frontend calls `requestAIReply` → backend `aiService`.
-4. Gemini model returns the AI reply and the debate saves the new message.
-5. When the user requests analysis, the frontend calls `requestDebateAnalysis` and the backend stores structured feedback in the debate document.
-6. The **Analysis Dashboard** displays scores, fallacies, and improvement suggestions.
-
-### API Overview (new endpoints)
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/ai/topics` | Generate debate topics based on category input |
-| `POST` | `/api/ai/:id/reply` | Generate an AI response for the current debate conversation |
-| `POST` | `/api/ai/:id/analyze` | Analyze the debate and return structured scores and feedback |
-
-### Folder Structure (new/updated)
-```
-server/
-  models/
-    Debate.js          # now includes AI fields
-  services/
-    aiService.js       # AI logic
-  controllers/
-    aiController.js    # route handlers
-  routes/
-    aiRoutes.js        # AI API routes
-src/
-  components/
-    AnalysisDashboard.jsx
-  services/
-    api.js            # includes aiAPI
-    debateService.js   # uses aiAPI
-```
-
-### Running the Updated App
-1. **Backend** – install dependencies and set `AI_API_KEY` in `server/.env`.
-   ```bash
-   cd server
-   npm install
-   npm run dev
-   ```
-2. **Frontend** – no extra setup required; the new services are hot‑loaded.
-   ```bash
-   npm run dev
-   ```
-
-### Screenshots
-![AI Coaching UI](file:///C:/Users/NAITIK/.gemini/antigravity-ide/brain/e3a78ab3-0b78-4433-af48-695a4ebdb8fa/media__1780069532689.png)
+Open `http://localhost:5173` in your browser.
 
 ---
 
-## Phase 5 — Real-Time WebSockets & Debate Statistics
+## 📚 API Architecture
 
-🚀 **What’s new?** ArgueX is now truly real-time. We've integrated Socket.io for live updates, enhanced the AI Coach persona to be a generalized debate mentor, and added a rich Debate Statistics Dashboard.
+### REST Endpoints
+- `POST /api/auth/signup` — Register and return JWT.
+- `POST /api/auth/login` — Authenticate and return JWT.
+- `GET /api/auth/me` — Return the current user's profile and Elo.
+- `GET /api/debates` — List a user's debate history.
+- `POST /api/debates` — Create a new AI debate instance.
+- `GET /api/debates/leaderboard` — Fetch the global Elo rankings.
+- `POST /api/debates/group/evaluate` — Submit a multiplayer transcript for AI ranking.
 
-### Key Additions
-* 🔌 **Real-time WebSockets**: Integrated `Socket.io` to provide instant message delivery, real-time typing indicators, and live reaction updates without refreshing the page.
-* 📊 **Debate Statistics Dashboard**: A brand new UI component that visualizes debate metrics, including message counts, participant engagement, debate duration, and sentiment analysis for both multiplayer rooms and AI debates.
-* 🤖 **Generalized AI Coach Persona**: Evolved the AI from a strict Albert Einstein impersonator into a generalized "ArgueX AI Coach". The coach now provides intellectual, encouraging, and highly logical feedback to help users construct stronger arguments.
-* 🐛 **Bug Fixes & Stability**: Resolved a critical crash caused by negative string padding in the Socket.io middleware and fixed socket authentication to fetch complete user profiles from MongoDB.
-
-### API Overview (Phase 5 updates)
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/debates/:id/statistics` | Retrieve real-time statistics for an AI debate |
-| `GET` | `/api/chat/rooms/:roomId/statistics` | Retrieve real-time statistics for a multiplayer chat room |
-
----
-
-## Phase 6 — Professional UI/UX Transformation
-
-🎨 **What's new?** We completely rebuilt ArgueX's frontend to match the premium aesthetics of modern startups (like Linear, Notion, and Discord). The focus shifted from pure functionality to delivering an exceptional, polished user experience.
-
-### Key Enhancements
-* 💅 **Cohesive Design System**: Implemented a scalable Tailwind CSS design system in `index.css` with semantic color palettes, glassmorphism (`backdrop-blur-md`), and rich typography.
-* 🧩 **Reusable UI Library**: Built a complete suite of reusable, highly-polished components including `<Button>`, `<Input>`, `<Card>`, `<Badge>`, `<Avatar>`, and `<Skeleton>` loaders.
-* ✨ **Fluid Animations**: Integrated `framer-motion` to add smooth page transitions, micro-interactions, hover effects, and staggered list animations, making the app feel alive and responsive.
-* 🌓 **Dark Mode Support**: Added a fully functional dark/light mode toggle using a robust `ThemeContext.jsx`, ensuring perfect contrast and readability in both themes.
-* 📱 **Responsive & Accessible**: Completely overhauled the layouts for all pages (Landing, Auth, Dashboard, Debate, Profile) to ensure they look stunning on mobile, tablet, and desktop devices while maintaining clear visual hierarchy.
-* 🛠️ **Resilience & Bug Fixes**: Hardened the backend against expired authentication tokens (preventing unhandled promise crashes) and fixed critical routing issues when loading historical AI debates from the dashboard.
-
-### Folder Structure (Phase 6 Additions)
-```
-src/
-  components/ui/
-    Button.jsx
-    Input.jsx
-    Card.jsx
-    Badge.jsx
-    Avatar.jsx
-    Skeleton.jsx
-    EmptyState.jsx
-  context/
-    ThemeContext.jsx
-  index.css            # Centralized CSS variables and utilities
-```
+### Socket.io Events (WebRTC Signaling)
+- `joinRoom` / `leaveRoom` — Manage multiplayer lobbies.
+- `webrtc-offer` / `webrtc-answer` / `webrtc-ice-candidate` — P2P connection handshakes.
+- `multiplayer-message` — Broadcast live transcript sentences to the room.
 
 ---
 
-## Next steps
-
-- Implement **Global Leaderboards & Elo Ratings** by expanding the User model to calculate and track real Win Rates and Streaks.
-- Implement a **topic picker** to let users choose debate subjects.
-- Add a **"Finish Debate"** button that triggers a final AI summary report.
-- Expand multi-user debate rooms with moderation tools.
-
-*Enjoy debating with your newly polished, real-time AI coach!*
+## 🎨 Design Philosophy
+ArgueX prioritizes a premium, immersive aesthetic. It utilizes a deep dark mode (`bg-zinc-950`), vibrant brand accents (`brand-500`), smooth micro-animations, and glassmorphic overlays to make the debating experience feel cutting-edge and responsive.
