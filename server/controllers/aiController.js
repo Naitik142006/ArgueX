@@ -1,5 +1,7 @@
 import Debate from '../models/Debate.js';
+import User from '../models/User.js';
 import { aiService } from '../services/aiService.js';
+import { calculateNewRating, calculateStreaks, getRankTier } from '../services/eloService.js';
 
 /**
  * Generate AI reply for a debate.
@@ -80,9 +82,41 @@ export const analyzeDebate = async (req, res) => {
   // We expect evaluateDebate to return a structured JSON object
   const analysis = await aiService.evaluateDebate(debate.messages);
 
+  const user = await User.findById(req.user._id);
+  let eloChange = 0;
+
+  if (user && analysis.winner) {
+    // 1 for win, 0 for loss, 0.5 for draw
+    let actualScore = 0.5;
+    if (analysis.winner === 'user') actualScore = 1;
+    if (analysis.winner === 'ai') actualScore = 0;
+
+    // AI's baseline rating is assumed to be 1500 for now
+    const ratingResult = calculateNewRating(user.eloRating || 1200, 1500, actualScore);
+    eloChange = ratingResult.eloChange;
+    
+    user.eloRating = ratingResult.newRating;
+    user.rank = getRankTier(user.eloRating);
+    
+    if (actualScore === 1) user.wins += 1;
+    else if (actualScore === 0) user.losses += 1;
+    else user.draws += 1;
+
+    // Calculate streaks
+    const streakResult = calculateStreaks(user.lastDebateDate, user.currentStreak || 0, user.highestStreak || 0);
+    user.currentStreak = streakResult.currentStreak;
+    user.highestStreak = streakResult.highestStreak;
+    user.lastDebateDate = new Date();
+
+    await user.save();
+  }
+
   // Update debate status and save analysis
   debate.status = 'completed';
-  debate.analysis = analysis;
+  debate.analysis = {
+    ...analysis,
+    eloChange
+  };
   
   await debate.save();
 

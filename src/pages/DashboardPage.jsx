@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Swords, Plus, History, Trophy, TrendingUp, ChevronRight, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { fetchUserDebates } from '../services/debateService.js';
+import { userAPI } from '../services/api.js';
 import Card from '../components/ui/Card.jsx';
 import Button from '../components/ui/Button.jsx';
 import Badge from '../components/ui/Badge.jsx';
@@ -14,27 +15,32 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [debates, setDebates] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadDebates = async () => {
+    const loadDashboard = async () => {
       try {
-        const data = await fetchUserDebates();
-        setDebates(data);
+        const [debatesData, analyticsData] = await Promise.all([
+          fetchUserDebates(),
+          userAPI.getAnalytics()
+        ]);
+        setDebates(debatesData);
+        setAnalytics(analyticsData);
       } catch (error) {
-        console.error('Failed to load debates:', error);
+        console.error('Failed to load dashboard:', error);
       } finally {
         setLoading(false);
       }
     };
-    loadDebates();
+    loadDashboard();
   }, []);
 
   const stats = [
-    { label: 'Total Debates', value: debates.length, icon: Swords, color: 'text-brand-500', bg: 'bg-brand-500/10' },
-    { label: 'Win Rate', value: '0%', icon: Trophy, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { label: 'Current Streak', value: '0', icon: Zap, color: 'text-rose-500', bg: 'bg-rose-500/10' },
-    { label: 'Global Rank', value: 'Unranked', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { label: 'Total Debates', value: analytics?.totalDebates || 0, icon: Swords, color: 'text-brand-500', bg: 'bg-brand-500/10' },
+    { label: 'Win Rate', value: `${analytics?.winRate || 0}%`, icon: Trophy, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    { label: 'Current Streak', value: analytics?.currentStreak || 0, icon: Zap, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+    { label: 'Global Rank', value: analytics?.rank || 'Bronze', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
   ];
 
   return (

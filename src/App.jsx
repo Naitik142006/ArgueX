@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import DebatePage from './pages/DebatePage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import DebateRoom from './components/DebateRoom.jsx';
+import LeaderboardPage from './pages/LeaderboardPage.jsx';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route index element={<LandingPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
+        <Route path="leaderboard" element={<LeaderboardPage />} />
         <Route
           path="dashboard"
           element={

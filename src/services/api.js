@@ -358,6 +358,20 @@ const userAPI = {
   },
 
   /**
+   * Get global leaderboard
+   */
+  getLeaderboard: async () => {
+    return makeRequest('/users/leaderboard', 'GET');
+  },
+
+  /**
+   * Get personal analytics
+   */
+  getAnalytics: async () => {
+    return makeRequest('/users/me/analytics', 'GET');
+  },
+
+  /**
    * Get user's debate history
    * 
    * @param {string} userId - User's MongoDB ID

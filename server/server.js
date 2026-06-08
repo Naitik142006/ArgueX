@@ -8,6 +8,7 @@ import debateRoutes from './routes/debateRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { initializeSocket } from './socket/socket.js';
 
@@ -36,6 +37,7 @@ app.use('/api/debates', debateRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/users', userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

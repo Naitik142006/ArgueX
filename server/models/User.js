@@ -20,8 +20,23 @@ const userSchema = mongoose.Schema(
     },
     rank: {
       type: String,
-      default: 'Novice',
+      default: 'Bronze',
     },
+    eloRating: {
+      type: Number,
+      default: 1200,
+    },
+    wins: { type: Number, default: 0 },
+    losses: { type: Number, default: 0 },
+    draws: { type: Number, default: 0 },
+    currentStreak: { type: Number, default: 0 },
+    highestStreak: { type: Number, default: 0 },
+    lastDebateDate: { type: Date, default: null },
+    achievements: [{
+      title: String,
+      unlockedAt: { type: Date, default: Date.now },
+      icon: String
+    }],
   },
   {
     timestamps: true,

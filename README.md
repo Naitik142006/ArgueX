@@ -298,10 +298,41 @@ src/
 
 ---
 
+## Phase 6 — Professional UI/UX Transformation
+
+🎨 **What's new?** We completely rebuilt ArgueX's frontend to match the premium aesthetics of modern startups (like Linear, Notion, and Discord). The focus shifted from pure functionality to delivering an exceptional, polished user experience.
+
+### Key Enhancements
+* 💅 **Cohesive Design System**: Implemented a scalable Tailwind CSS design system in `index.css` with semantic color palettes, glassmorphism (`backdrop-blur-md`), and rich typography.
+* 🧩 **Reusable UI Library**: Built a complete suite of reusable, highly-polished components including `<Button>`, `<Input>`, `<Card>`, `<Badge>`, `<Avatar>`, and `<Skeleton>` loaders.
+* ✨ **Fluid Animations**: Integrated `framer-motion` to add smooth page transitions, micro-interactions, hover effects, and staggered list animations, making the app feel alive and responsive.
+* 🌓 **Dark Mode Support**: Added a fully functional dark/light mode toggle using a robust `ThemeContext.jsx`, ensuring perfect contrast and readability in both themes.
+* 📱 **Responsive & Accessible**: Completely overhauled the layouts for all pages (Landing, Auth, Dashboard, Debate, Profile) to ensure they look stunning on mobile, tablet, and desktop devices while maintaining clear visual hierarchy.
+* 🛠️ **Resilience & Bug Fixes**: Hardened the backend against expired authentication tokens (preventing unhandled promise crashes) and fixed critical routing issues when loading historical AI debates from the dashboard.
+
+### Folder Structure (Phase 6 Additions)
+```
+src/
+  components/ui/
+    Button.jsx
+    Input.jsx
+    Card.jsx
+    Badge.jsx
+    Avatar.jsx
+    Skeleton.jsx
+    EmptyState.jsx
+  context/
+    ThemeContext.jsx
+  index.css            # Centralized CSS variables and utilities
+```
+
+---
+
 ## Next steps
 
+- Implement **Global Leaderboards & Elo Ratings** by expanding the User model to calculate and track real Win Rates and Streaks.
 - Implement a **topic picker** to let users choose debate subjects.
 - Add a **"Finish Debate"** button that triggers a final AI summary report.
 - Expand multi-user debate rooms with moderation tools.
 
-*Enjoy debating with your new real-time AI coach!*
+*Enjoy debating with your newly polished, real-time AI coach!*

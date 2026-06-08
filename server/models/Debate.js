@@ -36,6 +36,11 @@ const debateSchema = mongoose.Schema(
       type: String,
       default: 'coach',
     },
+    mode: {
+      type: String,
+      enum: ['text', 'voice', 'video'],
+      default: 'text',
+    },
     status: {
       type: String,
       enum: ['active', 'completed'],
@@ -45,6 +50,13 @@ const debateSchema = mongoose.Schema(
       logicScore: Number,
       evidenceScore: Number,
       persuasionScore: Number,
+      clarityScore: Number,
+      winner: {
+        type: String,
+        enum: ['user', 'ai', 'draw', null],
+        default: null
+      },
+      eloChange: { type: Number, default: 0 },
       summary: String,
       fallacies: [
         {

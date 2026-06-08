@@ -22,7 +22,7 @@ const getAIClient = () => {
   return new GoogleGenerativeAI(apiKey);
 };
 
-const MODELS_TO_TRY = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+const MODELS_TO_TRY = ['gemini-2.5-flash'];
 
 const logGeminiEvent = (event, meta) => {
   console.info(`[Gemini] ${event}`, meta);
@@ -107,7 +107,9 @@ Evaluate the User's performance. You must return your evaluation strictly as a v
   "logicScore": <number 0-10>,
   "evidenceScore": <number 0-10>,
   "persuasionScore": <number 0-10>,
-  "summary": "<A 2-sentence summary of the user's main arguments>",
+  "clarityScore": <number 0-10>,
+  "winner": "<'user' or 'ai' or 'draw'>",
+  "summary": "<A 2-sentence summary of the debate and why the winner won>",
   "fallacies": [
     { "name": "<Name of fallacy>", "explanation": "<Why the user committed this fallacy>" }
   ],
@@ -120,7 +122,10 @@ Evaluate the User's performance. You must return your evaluation strictly as a v
     });
 
     try {
-      const response = await executeWithFallback(genAI, prompt, { temperature: 0.0 });
+      const response = await executeWithFallback(genAI, prompt, { 
+        temperature: 0.0,
+        responseMimeType: "application/json"
+      });
       const text = response.text();
 
       console.info('[Gemini] evaluateDebate.success', {

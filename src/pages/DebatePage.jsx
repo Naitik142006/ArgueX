@@ -1,14 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Swords, Zap } from 'lucide-react';
+import { Swords, Zap, Mic, MicOff } from 'lucide-react';
 import { createDebateRequest, addDebateMessageRequest, requestAIReply } from '../services/debateService.js';
-import { debateAPI } from '../services/api.js';
+import { debateAPI, aiAPI } from '../services/api.js';
 import MessageItem from '../components/MessageItem.jsx';
 import DebateStatistics from '../components/DebateStatistics.jsx';
 import MessageThread from '../components/MessageThread.jsx';
+import LiveTranscriptPanel from '../components/debate/LiveTranscriptPanel.jsx';
+import ScorecardModal from '../components/debate/ScorecardModal.jsx';
 import Button from '../components/ui/Button.jsx';
 import { useSocket } from '../hooks/useSocket.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition.js';
 
 /**
  * Normalize a debate-API message into the shape MessageItem expects.
@@ -40,9 +43,32 @@ function DebatePage() {
   const [isAITyping, setIsAITyping] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [threadMessage, setThreadMessage] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const { urlDebateId } = useParams();
   const { user: currentUser } = useAuth();
+  
+  const {
+    isListening,
+    transcript,
+    interimTranscript,
+    startListening,
+    stopListening,
+    resetTranscript,
+    error: speechError,
+    hasSupport
+  } = useSpeechRecognition();
+
+  // Append transcript to draft when user stops speaking
+  const prevListening = useRef(isListening);
+  useEffect(() => {
+    if (prevListening.current && !isListening && transcript) {
+      setDraft(prev => prev + (prev ? ' ' : '') + transcript.trim());
+      resetTranscript();
+    }
+    prevListening.current = isListening;
+  }, [isListening, transcript, resetTranscript]);
 
   // Get token for socket connection
   const token = window.localStorage.getItem('token');
@@ -212,6 +238,20 @@ function DebatePage() {
     }
   };
 
+  const handleConclude = async () => {
+    if (!debateId) return;
+    try {
+      setIsAnalyzing(true);
+      setError('');
+      const data = await aiAPI.analyze(debateId);
+      setAnalysis(data.analysis);
+    } catch (err) {
+      setError('Failed to analyze debate: ' + err.message);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   // -- Handlers passed to MessageItem (matching its prop interface) --
   const handleAddReaction = (messageId, emoji) => {
     if (socket) {
@@ -286,13 +326,24 @@ function DebatePage() {
             </div>
           </div>
 
-          <Button
-            variant={showStats ? 'primary' : 'outline'}
-            onClick={() => setShowStats((s) => !s)}
-          >
-            {showStats ? 'Hide Stats' : 'Show Stats'}
-          </Button>
-        </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={showStats ? 'primary' : 'outline'}
+                onClick={() => setShowStats((s) => !s)}
+              >
+                {showStats ? 'Hide Stats' : 'Show Stats'}
+              </Button>
+              {debateId && (
+                <Button
+                  variant="brand"
+                  onClick={handleConclude}
+                  disabled={isAnalyzing || messages.length < 2}
+                >
+                  {isAnalyzing ? 'Judging...' : 'Conclude Debate'}
+                </Button>
+              )}
+            </div>
+          </div>
 
         <div className="flex gap-3">
           <input
@@ -367,6 +418,17 @@ function DebatePage() {
           )}
         </div>
 
+        {/* Live Transcript Panel */}
+        <div className="px-4 bg-zinc-50 dark:bg-zinc-950/50">
+          <LiveTranscriptPanel
+            isListening={isListening}
+            transcript={transcript}
+            interimTranscript={interimTranscript}
+            error={speechError}
+            hasSupport={hasSupport}
+          />
+        </div>
+
         {/* Input Area */}
         <div className="p-4 bg-zinc-50 dark:bg-zinc-950/50 border-t border-zinc-200 dark:border-zinc-800">
           <div className="flex gap-3">
@@ -383,9 +445,19 @@ function DebatePage() {
               className="flex-1 max-h-32 min-h-[52px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500 resize-none smooth-scroll transition-all"
               rows={1}
             />
+            {hasSupport && (
+              <Button
+                variant={isListening ? 'danger' : 'outline'}
+                onClick={isListening ? stopListening : startListening}
+                className={`h-[52px] w-[52px] shrink-0 p-0 flex items-center justify-center rounded-xl transition-all ${isListening ? 'animate-pulse ring-4 ring-rose-500/30' : ''}`}
+                title={isListening ? "Stop listening" : "Start speaking"}
+              >
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+              </Button>
+            )}
             <Button
               onClick={handleSend}
-              disabled={isAITyping || !draft.trim()}
+              disabled={isAITyping || (!draft.trim() && !transcript)}
               variant="brand"
               className="h-[52px] px-6 shrink-0"
             >
@@ -408,6 +480,12 @@ function DebatePage() {
           onAddReaction={handleAddReaction}
         />
       )}
+
+      <ScorecardModal 
+        isOpen={!!analysis} 
+        analysis={analysis} 
+        onClose={() => setAnalysis(null)} 
+      />
     </div>
   );
 }
