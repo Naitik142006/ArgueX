@@ -9,6 +9,8 @@ import DebatePage from './pages/DebatePage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import DebateRoom from './components/DebateRoom.jsx';
 import LeaderboardPage from './pages/LeaderboardPage.jsx';
+import MultiplayerDebatePage from './pages/MultiplayerDebatePage.jsx';
+import ReplayPage from './pages/ReplayPage.jsx';
 
 function App() {
   return (
@@ -39,6 +41,22 @@ function App() {
           element={
             <ProtectedRoute>
               <DebatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="multiplayer/:roomId"
+          element={
+            <ProtectedRoute>
+              <MultiplayerDebatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="replay/:id"
+          element={
+            <ProtectedRoute>
+              <ReplayPage />
             </ProtectedRoute>
           }
         />

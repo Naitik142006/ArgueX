@@ -55,11 +55,19 @@ export default function DashboardPage() {
             Ready to test your logic today?
           </p>
         </div>
-        <Link to="/debate">
-          <Button variant="brand" icon={<Plus size={18} />}>
-            New Debate
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link to={`/multiplayer/${Math.random().toString(36).substring(2, 10)}`}>
+            <Button variant="outline" className="border-brand-500/30 text-brand-600 dark:text-brand-400 hover:bg-brand-500/10 gap-2">
+              <Swords size={18} />
+              Play a Human
+            </Button>
+          </Link>
+          <Link to="/debate">
+            <Button variant="brand" icon={<Plus size={18} />}>
+              New AI Debate
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid */}

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
  * Custom hook for Web Speech API (Speech-to-Text)
  * Handles continuous listening, push-to-talk, and browser compatibility.
  */
-export function useSpeechRecognition() {
+export function useSpeechRecognition({ onFinalResult } = {}) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
@@ -41,6 +41,7 @@ export function useSpeechRecognition() {
 
       if (finalStr) {
         setTranscript((prev) => prev + finalStr);
+        if (onFinalResult) onFinalResult(finalStr.trim());
       }
       setInterimTranscript(interimStr);
     };

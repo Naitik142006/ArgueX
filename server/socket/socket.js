@@ -488,6 +488,55 @@ export const initializeSocket = (server, options = {}) => {
     });
 
     /**
+     * ==========================================
+     * MULTIPLAYER TRANSCRIPTS (Phase 7B)
+     * ==========================================
+     */
+    socket.on('multiplayer-message', ({ roomId, text }) => {
+      if (!roomId || !text) return;
+
+      const message = {
+        _id: Math.random().toString(36).substring(2, 9),
+        sender: socket.userName,
+        userId: socket.userId,
+        text: text,
+        timestamp: new Date()
+      };
+
+      // Store in memory (for AI judging later)
+      if (!global.multiplayerTranscripts) {
+        global.multiplayerTranscripts = new Map();
+      }
+      if (!global.multiplayerTranscripts.has(roomId)) {
+        global.multiplayerTranscripts.set(roomId, []);
+      }
+      global.multiplayerTranscripts.get(roomId).push(message);
+
+      // Broadcast to everyone in the room (including sender)
+      io.to(roomId).emit('multiplayer-transcript-update', message);
+    });
+
+    /**
+     * ==========================================
+     * WEBRTC SIGNALING (Phase 6)
+     * ==========================================
+     */
+    socket.on('webrtc-offer', ({ roomId, offer, senderUserId, targetUserId }) => {
+      // Forward the offer to the room, so the specific target can pick it up
+      socket.to(roomId).emit('webrtc-offer', { offer, senderUserId, targetUserId });
+    });
+
+    socket.on('webrtc-answer', ({ roomId, answer, senderUserId, targetUserId }) => {
+      // Forward the answer
+      socket.to(roomId).emit('webrtc-answer', { answer, senderUserId, targetUserId });
+    });
+
+    socket.on('webrtc-ice-candidate', ({ roomId, candidate, senderUserId, targetUserId }) => {
+      // Forward the ICE candidate
+      socket.to(roomId).emit('webrtc-ice-candidate', { candidate, senderUserId, targetUserId });
+    });
+
+    /**
      * EVENT: Disconnect
      * 
      * User closes browser, network drops, etc.

@@ -150,6 +150,7 @@ Evaluate the User's performance. You must return your evaluation strictly as a v
    * Generates a list of debate topics based on a category.
    */
   generateTopics: async (category) => {
+    // ... [existing generateTopics code] ...
     const genAI = getAIClient();
 
     const prompt = `Generate 5 highly controversial and interesting debate topics in the category of "${category}".
@@ -179,6 +180,64 @@ Return as a JSON array of strings only, no other text. Example: ["Topic 1", "Top
       console.error('AI Service Error (generateTopics):', error.message || error);
       console.error('Full error stack:', error);
       throw new Error(`Gemini generateTopics failed: ${error.message || error}`);
+    }
+  },
+
+  /**
+   * Evaluates a multiplayer group debate and ranks participants.
+   */
+  evaluateGroupDebate: async (messages) => {
+    const genAI = getAIClient();
+
+    const historyText = messages.map(m => `${m.sender} (${m.userId}): ${m.text}`).join('\n');
+    const prompt = `You are an expert debate judge and logician.
+Analyze the following live group debate transcript.
+
+DEBATE HISTORY:
+${historyText}
+
+INSTRUCTIONS:
+Evaluate the performance of EACH participant. Rank them from 1st place to last place based on their logic, evidence, and persuasion.
+You must return your evaluation strictly as a valid JSON object matching this exact structure, with no markdown formatting around it:
+{
+  "summary": "<A 2-3 sentence summary of the group debate and the prevailing arguments>",
+  "rankings": [
+    {
+      "userId": "<The exact userId provided in the transcript>",
+      "username": "<The exact username/sender provided in the transcript>",
+      "rank": <number, 1 for winner, 2 for second, etc.>,
+      "logicScore": <number 0-10>,
+      "feedback": "<1 paragraph of constructive feedback for this specific user>"
+    }
+  ]
+}`;
+
+    logGeminiEvent('evaluateGroupDebate.request', {
+      temperature: 0.0,
+      historyLength: messages.length,
+    });
+
+    try {
+      const response = await executeWithFallback(genAI, prompt, { 
+        temperature: 0.0,
+        responseMimeType: "application/json"
+      });
+      const text = response.text();
+
+      console.info('[Gemini] evaluateGroupDebate.success', {
+        responseLength: text.length,
+      });
+
+      try {
+        return JSON.parse(text);
+      } catch (parseError) {
+        console.error('AI Service Error (evaluateGroup.parse): invalid JSON', parseError.message);
+        console.error('Gemini raw response:', text);
+        throw new Error(`Gemini evaluateGroupDebate returned invalid JSON: ${parseError.message}`);
+      }
+    } catch (error) {
+      console.error('AI Service Error (evaluateGroupDebate):', error.message || error);
+      throw new Error(`Gemini evaluateGroupDebate failed: ${error.message || error}`);
     }
   }
 

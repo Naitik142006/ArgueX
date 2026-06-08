@@ -105,5 +105,33 @@ export const getDebateStatistics = async (req, res) => {
         }
       ]
     }
+    }
   });
+};
+
+/**
+ * Evaluate a multiplayer group debate
+ * @route POST /api/debates/group/evaluate
+ */
+export const evaluateGroup = async (req, res) => {
+  const { roomId } = req.body;
+  if (!roomId) {
+    return res.status(400).json({ message: 'roomId is required' });
+  }
+
+  const messages = global.multiplayerTranscripts ? global.multiplayerTranscripts.get(roomId) : null;
+  if (!messages || messages.length === 0) {
+    return res.status(400).json({ message: 'No transcript found for this room' });
+  }
+
+  try {
+    const { evaluateGroupDebate } = await import('../services/aiService.js');
+    const evaluation = await evaluateGroupDebate(messages);
+
+    // Save to DB (optional, since it's an ephemeral room we might just return it)
+    res.json(evaluation);
+  } catch (error) {
+    console.error('evaluateGroup error:', error);
+    res.status(500).json({ message: 'Failed to evaluate group debate' });
+  }
 };
