@@ -21,14 +21,14 @@ const Input = forwardRef(function Input(
   return (
     <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
       {label && (
-        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+        <label className="text-sm font-semibold tracking-wide font-heading text-zinc-300 uppercase">
           {label}
         </label>
       )}
 
-      <div className="relative">
+      <div className="relative group">
         {icon && (
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-brand-400 transition-colors pointer-events-none">
             {icon}
           </div>
         )}
@@ -37,17 +37,17 @@ const Input = forwardRef(function Input(
           ref={ref}
           type={inputType}
           className={[
-            'w-full rounded-xl border bg-white dark:bg-zinc-900',
-            'text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600',
-            'transition-all duration-150 outline-none',
-            'focus:ring-2 focus:ring-brand-500 focus:border-brand-500',
-            'dark:focus:ring-brand-500/40',
+            'w-full rounded-xl border bg-surface/50 backdrop-blur-sm',
+            'text-zinc-100 placeholder-zinc-600',
+            'transition-all duration-300 outline-none',
+            'focus:bg-surface focus:ring-2 focus:ring-brand-500/50 focus:border-brand-400',
+            'hover:border-white/20',
             error
-              ? 'border-rose-400 dark:border-rose-600 focus:ring-rose-500/40 focus:border-rose-500'
-              : 'border-zinc-200 dark:border-zinc-700',
-            icon ? 'pl-10 pr-4 py-3' : 'px-4 py-3',
+              ? 'border-rose-500/50 focus:ring-rose-500/40 focus:border-rose-400'
+              : 'border-white/10',
+            icon ? 'pl-11 pr-4 py-3.5' : 'px-4 py-3.5',
             isPassword && 'pr-12',
-            'text-sm',
+            'text-sm font-mono',
             className,
           ].join(' ')}
           {...props}
@@ -57,28 +57,28 @@ const Input = forwardRef(function Input(
           <button
             type="button"
             onClick={() => setShowPass(v => !v)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
             tabIndex={-1}
           >
-            {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         )}
 
         {error && !isPassword && (
-          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-rose-500 pointer-events-none">
-            <AlertCircle size={16} />
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-rose-500 pointer-events-none">
+            <AlertCircle size={18} />
           </div>
         )}
       </div>
 
       {error && (
-        <p className="flex items-center gap-1.5 text-xs text-rose-500 dark:text-rose-400">
-          <AlertCircle size={12} />
+        <p className="flex items-center gap-1.5 text-xs text-rose-400 font-medium mt-1">
+          <AlertCircle size={14} />
           {error}
         </p>
       )}
       {hint && !error && (
-        <p className="text-xs text-zinc-500 dark:text-zinc-500">{hint}</p>
+        <p className="text-xs text-zinc-500 mt-1">{hint}</p>
       )}
     </div>
   );

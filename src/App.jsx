@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './layouts/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import PublicRoute from './components/PublicRoute.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
@@ -16,10 +17,17 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index element={<LandingPage />} />
-        <Route path="login" element={<LoginPage />} />
-        <Route path="signup" element={<SignupPage />} />
-        <Route path="leaderboard" element={<LeaderboardPage />} />
+        <Route index element={<PublicRoute><LandingPage /></PublicRoute>} />
+        <Route path="login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+        <Route path="signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+        <Route
+          path="leaderboard"
+          element={
+            <ProtectedRoute>
+              <LeaderboardPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="dashboard"
           element={

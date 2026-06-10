@@ -22,30 +22,54 @@ const getAIClient = () => {
   return new GoogleGenerativeAI(apiKey);
 };
 
-const MODELS_TO_TRY = ['gemini-2.5-flash'];
+const MODELS_TO_TRY = [
+  'gemini-3.5-flash',
+  'gemini-2.5-flash',
+  'gemini-3-flash-preview',
+  'gemini-2.0-flash',
+  'gemini-flash-latest'
+];
 
 const logGeminiEvent = (event, meta) => {
   console.info(`[Gemini] ${event}`, meta);
 };
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const executeWithFallback = async (genAI, prompt, generationConfig) => {
   let lastError;
+  const maxRetries = 2; // Try each model up to 3 times total
+  
   for (const modelName of MODELS_TO_TRY) {
-    try {
-      const model = genAI.getGenerativeModel({ 
-        model: modelName,
-        generationConfig 
-      });
-      console.info(`[Gemini] Attempting request with model: ${modelName}`);
-      const result = await model.generateContent(prompt);
-      return await result.response;
-    } catch (error) {
-      console.warn(`[Gemini] Model ${modelName} failed:`, error.message);
-      lastError = error;
-      // 429 is Too Many Requests, 503 is Service Unavailable. We retry on these.
-      // Other errors might be terminal (e.g. 400 Bad Request), but we'll try fallback just in case.
-      if (error.status === 400 || error.status === 401 || error.status === 403) {
-        throw error; // Auth or Bad Request errors won't be fixed by changing models
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          generationConfig 
+        });
+        console.info(`[Gemini] Attempting request with model: ${modelName} (Attempt ${attempt + 1})`);
+        const result = await model.generateContent(prompt);
+        return await result.response;
+      } catch (error) {
+        console.warn(`[Gemini] Model ${modelName} failed on attempt ${attempt + 1}:`, error.message);
+        lastError = error;
+        
+        // Fatal errors - don't try other models
+        if (error.status === 400 || error.status === 401 || error.status === 403) {
+          throw error; 
+        }
+        
+        // Not Found - model doesn't exist, break loop to try next model immediately
+        if (error.status === 404 || error.message.includes('404')) {
+          break;
+        }
+
+        // Rate limit or Service Unavailable - wait and retry
+        if (attempt < maxRetries) {
+          const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+          console.info(`[Gemini] Waiting ${Math.round(delay)}ms before retrying...`);
+          await sleep(delay);
+        }
       }
     }
   }

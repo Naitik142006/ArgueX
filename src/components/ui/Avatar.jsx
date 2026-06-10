@@ -3,11 +3,11 @@
  * Shows initials with gradient background; supports online indicator and sizes.
  */
 const GRADIENT_PAIRS = [
-  ['from-brand-500 to-accent-500', 'text-white'],
-  ['from-emerald-500 to-teal-500', 'text-white'],
-  ['from-rose-500 to-pink-500',    'text-white'],
-  ['from-amber-400 to-orange-500', 'text-white'],
-  ['from-cyan-500 to-blue-500',    'text-white'],
+  ['from-brand-500 to-neon-violet', 'text-white'],
+  ['from-neon-cyan to-brand-500', 'text-white'],
+  ['from-neon-pink to-neon-violet', 'text-white'],
+  ['from-rank-gold to-orange-500', 'text-white'],
+  ['from-brand-400 to-brand-600', 'text-white'],
 ];
 
 const sizeMap = {
@@ -46,14 +46,14 @@ export default function Avatar({
         <img
           src={src}
           alt={name}
-          className={`w-full h-full rounded-full object-cover`}
+          className={`w-full h-full rounded-full object-cover border border-white/10`}
         />
       ) : (
         <div
           className={`
             w-full h-full rounded-full flex items-center justify-center
             bg-gradient-to-br ${gradient} ${textColor}
-            font-heading font-semibold ${s.text} select-none
+            font-heading font-bold ${s.text} select-none border border-white/20 shadow-glass
           `}
         >
           {getInitials(name)}
@@ -62,8 +62,8 @@ export default function Avatar({
 
       {online && (
         <span
-          className={`absolute ${s.dot} rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-900`}
-          style={{ boxShadow: '0 0 6px 1px rgb(16 185 129 / 0.6)' }}
+          className={`absolute ${s.dot} rounded-full bg-emerald-400 border-2 border-background`}
+          style={{ boxShadow: '0 0 8px 1px rgb(52 211 153 / 0.6)' }}
         />
       )}
     </div>

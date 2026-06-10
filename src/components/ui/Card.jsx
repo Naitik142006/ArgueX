@@ -12,10 +12,10 @@ const Card = forwardRef(function Card(
   ref
 ) {
   const variants = {
-    default: 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800',
-    elevated: 'surface-elevated',
-    glass: 'glass-dark',
-    flat: 'bg-zinc-50 dark:bg-zinc-900/50 border-none',
+    default: 'bg-surface border border-surface-border',
+    glass: 'glass-panel',
+    elevated: 'bg-surface border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.5)]',
+    flat: 'bg-white/5 border-none',
   };
 
   return (
@@ -24,7 +24,7 @@ const Card = forwardRef(function Card(
       className={[
         'rounded-2xl overflow-hidden',
         variants[variant],
-        interactive && 'transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 cursor-pointer',
+        interactive && 'transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-glass cursor-pointer cursor-pointer',
         padding,
         className,
       ].join(' ')}

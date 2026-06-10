@@ -105,7 +105,6 @@ export const getDebateStatistics = async (req, res) => {
         }
       ]
     }
-    }
   });
 };
 
