@@ -37,7 +37,7 @@ export default {
       },
       animation: {
         'shimmer': 'shimmer 2s linear infinite',
-        'glow-pulse': 'glow-pulse 3s ease-in-out infinite',
+        
         'float': 'float 4s ease-in-out infinite',
         'float-delayed': 'float 4s ease-in-out 2s infinite',
         'fade-in': 'fade-in 0.3s ease-out forwards',
@@ -50,10 +50,6 @@ export default {
         shimmer: {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(200%)' },
-        },
-        'glow-pulse': {
-          '0%, 100%': { opacity: '0.6', filter: 'brightness(1)' },
-          '50%': { opacity: '1', filter: 'brightness(1.2)' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
@@ -82,17 +78,17 @@ export default {
       },
       boxShadow: {
         'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',
-        'neon-blue': '0 0 15px rgba(59, 130, 246, 0.5), 0 0 30px rgba(59, 130, 246, 0.2)',
-        'neon-violet': '0 0 15px rgba(139, 92, 246, 0.5), 0 0 30px rgba(139, 92, 246, 0.2)',
-        'neon-cyan': '0 0 15px rgba(6, 182, 212, 0.5), 0 0 30px rgba(6, 182, 212, 0.2)',
-        'rank-gold': '0 0 20px rgba(251, 191, 36, 0.4)',
-        'rank-diamond': '0 0 20px rgba(96, 165, 250, 0.4)',
-        'rank-master': '0 0 20px rgba(168, 85, 247, 0.4)',
+        
+        
+        
+        
+        
+        
       },
       backgroundImage: {
         'grid-pattern': 'linear-gradient(to right, #27272a 1px, transparent 1px), linear-gradient(to bottom, #27272a 1px, transparent 1px)',
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'arena-glow': 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.15) 0%, transparent 50%)',
+        
       }
     },
   },
