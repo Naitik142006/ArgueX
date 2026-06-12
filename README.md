@@ -18,6 +18,7 @@ Think of it as *"Chess.com meets Perplexity meets Discord."*
 ### 🎥 Live Multiplayer Arenas (WebRTC Mesh)
 - **Peer-to-Peer Architecture**: Host live 6-player video debates with zero latency using decentralized WebRTC mesh networking.
 - **Dynamic UI**: The cinematic grid automatically scales as more challengers join the lobby via secure invite links.
+- **Group AI Verdict**: Submit the live room transcript to ARGUS-V1 for a complete group analysis, ranking participants from 1st to Last place based on their performance.
 
 ### 🎙️ Decentralized STT & Telemetry
 - **In-Browser Speech-to-Text**: Utilize the native Web Speech API to transcribe your spoken arguments locally, preventing backend bottlenecks.
@@ -26,6 +27,10 @@ Think of it as *"Chess.com meets Perplexity meets Discord."*
 ### 🏆 Season 1 Global Ladder
 - Every match impacts your global Elo rating. 
 - Climb from Bronze to Grandmaster on the global leaderboard.
+
+### ⏪ Combat Archives (Replays)
+- Access a historical archive of all your past debates.
+- Review transcripts, re-read the AI's feedback, and analyze your logical fallacies to improve your skills over time.
 
 ---
 
@@ -47,8 +52,24 @@ Think of it as *"Chess.com meets Perplexity meets Discord."*
 
 ---
 
+## 📚 API Architecture
 
+### REST Endpoints
+- `POST /api/auth/signup` — Register and return JWT.
+- `POST /api/auth/login` — Authenticate and return JWT.
+- `GET /api/auth/profile` — Return the current user's profile and Elo.
+- `GET /api/debates` — List a user's debate history.
+- `POST /api/debates` — Create a new debate instance.
+- `POST /api/ai/topics` — Generate controversial debate topics.
+- `POST /api/ai/:id/reply` — Stream AI persona responses.
+- `POST /api/ai/:id/analyze` — Post-match AI evaluation and scorecard generation.
 
+### Socket.io Events (WebRTC Signaling)
+- `joinRoom` / `leaveRoom` — Manage multiplayer lobbies.
+- `webrtc-offer` / `webrtc-answer` / `webrtc-ice-candidate` — P2P connection handshakes.
+- `multiplayer-message` — Broadcast live transcript sentences to the room.
+
+---
 
 ## 🏁 Quickstart Initialization
 
