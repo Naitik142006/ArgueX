@@ -52,14 +52,15 @@ function App() {
  </ProtectedRoute>
  }
  />
- <Route
- path="multiplayer/:roomId"
- element={
- <ProtectedRoute>
- <MultiplayerDebatePage />
- </ProtectedRoute>
- }
- />
+        <Route
+          path="multiplayer"
+          element={
+            <ProtectedRoute>
+              <MultiplayerDebatePage />
+            </ProtectedRoute>
+          }
+        />
+
  <Route
  path="replay/:id"
  element={

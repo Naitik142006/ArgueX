@@ -43,12 +43,17 @@ export class VideoService {
 
  const peerConnection = new RTCPeerConnection(this.config);
 
- // Add local stream tracks to this peer connection
- if (this.localStream) {
- this.localStream.getTracks().forEach(track => {
- peerConnection.addTrack(track, this.localStream);
- });
- }
+    // Add local stream tracks to this peer connection
+    if (this.localStream) {
+      this.localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, this.localStream);
+      });
+    } else {
+      // If we don't have a camera, we STILL need to tell the other peer we want to receive video!
+      // Otherwise, the WebRTC offer will have no media lines and they won't send us anything.
+      peerConnection.addTransceiver('video', { direction: 'recvonly' });
+      peerConnection.addTransceiver('audio', { direction: 'recvonly' });
+    }
 
  // Handle incoming remote stream from this peer
  peerConnection.ontrack = (event) => {

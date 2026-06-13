@@ -298,7 +298,7 @@ function DebatePage() {
  <div>
  <div className="flex items-center gap-3 mb-1">
  <h1 className="text-3xl font-heading font-bold text-white tracking-tight uppercase">
- Training <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-neon-cyan">Arena</span>
+ Training <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-blue-200">Arena</span>
  </h1>
  {isConnected ? (
  <Badge variant="brand" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 py-0 text-[10px]">

@@ -67,11 +67,13 @@ export default function Navbar() {
  className="flex items-center gap-3 group"
  onClick={() => setMobileOpen(false)}
  >
- <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-neon-violet flex items-center justify-center group-hover: transition-all duration-300 border border-white/20">
- <Swords size={20} className="text-white drop-" />
+ <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-500 shadow-[0_0_25px_rgba(139,92,246,0.25)] group-hover:shadow-[0_0_35px_rgba(236,72,153,0.4)]">
+ <div className="absolute inset-0 bg-gradient-to-br from-brand-400 via-neon-violet to-neon-pink animate-gradient-shift bg-[length:200%_200%] opacity-90"></div>
+ <div className="absolute inset-[2px] bg-surface/80 backdrop-blur-md rounded-[14px]"></div>
+ <Swords size={24} className="relative z-10 text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.9)] group-hover:rotate-12 transition-transform duration-500" strokeWidth={2.5} />
  </div>
- <span className="font-heading font-bold text-2xl text-white tracking-tighter">
- Argue<span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-neon-cyan">X</span>
+ <span className="font-heading font-extrabold text-2xl text-white tracking-tighter">
+ Argue<span className="text-transparent bg-clip-text bg-gradient-to-br from-brand-400 via-neon-violet to-neon-pink">X</span>
  </span>
  </Link>
 

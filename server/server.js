@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import debateRoutes from './routes/debateRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
+import pvpRoutes from './routes/pvpRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
@@ -22,7 +23,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/],
+    origin: [/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/],
     credentials: true,
   })
 );
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/debates', debateRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/pvp', pvpRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 

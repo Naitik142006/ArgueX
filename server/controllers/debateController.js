@@ -113,19 +113,21 @@ export const getDebateStatistics = async (req, res) => {
  * @route POST /api/debates/group/evaluate
  */
 export const evaluateGroup = async (req, res) => {
-  const { roomId } = req.body;
+  const { roomId, chatMessages } = req.body;
   if (!roomId) {
     return res.status(400).json({ message: 'roomId is required' });
   }
 
-  const messages = global.multiplayerTranscripts ? global.multiplayerTranscripts.get(roomId) : null;
+  const messages = chatMessages && chatMessages.length > 0 
+    ? chatMessages 
+    : (global.multiplayerTranscripts ? global.multiplayerTranscripts.get(roomId) : null);
   if (!messages || messages.length === 0) {
     return res.status(400).json({ message: 'No transcript found for this room' });
   }
 
   try {
-    const { evaluateGroupDebate } = await import('../services/aiService.js');
-    const evaluation = await evaluateGroupDebate(messages);
+    const { aiService } = await import('../services/aiService.js');
+    const evaluation = await aiService.evaluateGroupDebate(messages);
 
     // Save to DB (optional, since it's an ephemeral room we might just return it)
     res.json(evaluation);

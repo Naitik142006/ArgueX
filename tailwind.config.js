@@ -22,6 +22,7 @@ export default {
         },
         neon: {
           blue: '#06b6d4', // Cyan
+          cyan: '#06b6d4',
           violet: '#8b5cf6',
           pink: '#ec4899',
         },

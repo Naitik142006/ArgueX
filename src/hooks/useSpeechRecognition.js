@@ -13,6 +13,11 @@ export function useSpeechRecognition({ onFinalResult } = {}) {
 
  const recognitionRef = useRef(null);
 
+ const onFinalResultRef = useRef(onFinalResult);
+ useEffect(() => {
+   onFinalResultRef.current = onFinalResult;
+ }, [onFinalResult]);
+
  useEffect(() => {
  // Check for browser support
  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -32,7 +37,7 @@ export function useSpeechRecognition({ onFinalResult } = {}) {
 
  for (let i = event.resultIndex; i < event.results.length; ++i) {
  if (event.results[i].isFinal) {
- finalStr += event.results[i][0].transcript +'';
+ finalStr += event.results[i][0].transcript +' ';
  } else {
  interimStr += event.results[i][0].transcript;
  }
@@ -40,7 +45,7 @@ export function useSpeechRecognition({ onFinalResult } = {}) {
 
  if (finalStr) {
  setTranscript((prev) => prev + finalStr);
- if (onFinalResult) onFinalResult(finalStr.trim());
+ if (onFinalResultRef.current) onFinalResultRef.current(finalStr.trim());
  }
  setInterimTranscript(interimStr);
  };

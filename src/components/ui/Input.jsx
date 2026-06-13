@@ -43,7 +43,7 @@ const Input = forwardRef(function Input(
  icon ?'pl-11 pr-4 py-3.5' :'px-4 py-3.5',
  isPassword &&'pr-12','text-sm font-mono',
  className,
- ].join('')}
+ ].join(' ')}
  {...props}
  />
 

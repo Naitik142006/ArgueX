@@ -56,7 +56,7 @@ export default function LoginPage() {
  <Cpu className="text-brand-400" size={32} />
  </div>
  <h2 className="text-5xl font-heading font-black text-white uppercase tracking-tight leading-tight mb-6">
- Initialize <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-neon-cyan">Combat Sequence</span>.
+ Welcome <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-blue-200">Back</span>.
  </h2>
  <p className="text-zinc-400 font-mono text-sm leading-relaxed max-w-sm uppercase tracking-widest">
  ArgueX is the ultimate arena for intellectual growth. Engage with AI, climb the ranks, and sharpen your mind.
@@ -92,7 +92,7 @@ export default function LoginPage() {
  >
  <div className="mb-10 text-center lg:text-left">
  <h1 className="text-4xl font-heading font-black text-white mb-3 uppercase tracking-tight">
- Authentication
+ Login
  </h1>
  <p className="text-zinc-400 font-mono text-xs uppercase tracking-widest">
  Please enter your credentials to proceed.
@@ -101,10 +101,10 @@ export default function LoginPage() {
 
  <form onSubmit={handleSubmit} className="space-y-6">
  <Input
- label="Transmission Address"
+ label="Email Address"
  name="email"
  type="email"
- placeholder="operator@system.com"
+ placeholder="name@example.com"
  icon={<Mail size={18} className="text-zinc-500" />}
  value={form.email}
  onChange={handleChange}
@@ -112,7 +112,7 @@ export default function LoginPage() {
  />
 
  <Input
- label="Security Key"
+ label="Password"
  name="password"
  type="password"
  placeholder="••••••••"
@@ -141,15 +141,15 @@ export default function LoginPage() {
  className="w-full font-heading font-bold tracking-widest text-sm"
  loading={isLoading}
  >
- ESTABLISH CONNECTION
+ LOGIN
  </Button>
  </div>
  </form>
 
  <p className="mt-10 text-center text-zinc-500 font-mono text-xs uppercase tracking-widest">
- Unregistered combatant?{''}
+ Don't have an account?{' '}
  <Link to="/signup" className="font-bold text-brand-400 hover:text-brand-300 transition-colors underline decoration-brand-500/30 underline-offset-4">
- Initialize Profile
+ Sign Up
  </Link>
  </p>
  </motion.div>

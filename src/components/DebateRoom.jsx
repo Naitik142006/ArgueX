@@ -42,7 +42,7 @@ export default function DebateRoom() {
  setIsLoading(true);
 
  // Fetch room details from API
- const response = await fetch(`http://localhost:5000/api/rooms/${roomId}`,
+ const response = await fetch(`/api/rooms/${roomId}`,
  {
  headers: {
  Authorization:`Bearer ${localStorage.getItem('authToken')}`,
@@ -60,7 +60,7 @@ export default function DebateRoom() {
  setRoomStatus(data.room.status);
 
  // Load messages
- const messagesResponse = await fetch(`http://localhost:5000/api/rooms/${roomId}/messages`,
+ const messagesResponse = await fetch(`/api/rooms/${roomId}/messages`,
  {
  headers: {
  Authorization:`Bearer ${localStorage.getItem('authToken')}`,
@@ -292,7 +292,7 @@ export default function DebateRoom() {
  */
  const handleEndDebate = async () => {
  try {
- const response = await fetch(`http://localhost:5000/api/rooms/${roomId}/end`,
+ const response = await fetch(`/api/rooms/${roomId}/end`,
  {
  method:'POST',
  headers: {
@@ -318,7 +318,7 @@ export default function DebateRoom() {
  */
  const handleLeaveDebate = async () => {
  try {
- await fetch(`http://localhost:5000/api/rooms/${roomId}/leave`,
+ await fetch(`/api/rooms/${roomId}/leave`,
  {
  method:'POST',
  headers: {

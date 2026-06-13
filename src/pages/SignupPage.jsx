@@ -108,7 +108,7 @@ export default function SignupPage() {
  >
  <div className="mb-10 text-center lg:text-left">
  <h1 className="text-4xl font-heading font-black text-white mb-3 uppercase tracking-tight">
- Create Dossier
+ Create Account
  </h1>
  <p className="text-zinc-400 font-mono text-xs uppercase tracking-widest">
  Join thousands of debaters improving their logic.
@@ -117,7 +117,7 @@ export default function SignupPage() {
 
  <form onSubmit={handleSubmit} className="space-y-6">
  <Input
- label="Combatant Alias"
+ label="Username"
  name="username"
  type="text"
  placeholder="e.g. LogicMaster99"
@@ -128,10 +128,10 @@ export default function SignupPage() {
  />
 
  <Input
- label="Transmission Address"
+ label="Email Address"
  name="email"
  type="email"
- placeholder="operator@system.com"
+ placeholder="name@example.com"
  icon={<Mail size={18} className="text-zinc-500" />}
  value={form.email}
  onChange={handleChange}
@@ -140,7 +140,7 @@ export default function SignupPage() {
 
  <div>
  <Input
- label="Security Key"
+ label="Password"
  name="password"
  type="password"
  placeholder="Create a strong password"
@@ -188,15 +188,15 @@ export default function SignupPage() {
  className="w-full font-heading font-bold tracking-widest text-sm"
  loading={isLoading}
  >
- REGISTER COMBATANT
+ SIGN UP
  </Button>
  </div>
  </form>
 
  <p className="mt-10 text-center text-zinc-500 font-mono text-xs uppercase tracking-widest">
- Already registered?{''}
+ Already have an account?{''}
  <Link to="/login" className="font-bold text-brand-400 hover:text-brand-300 transition-colors underline decoration-brand-500/30 underline-offset-4">
- Initialize Session
+ Log In
  </Link>
  </p>
  </motion.div>

@@ -57,14 +57,14 @@ export default function DashboardPage() {
  </span>
  </Badge>
  <h1 className="text-4xl sm:text-5xl font-heading font-bold text-white tracking-tight uppercase">
- Mission <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-neon-cyan">Control</span>
+        Mission <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-blue-200">Control</span>
  </h1>
  <p className="text-zinc-400 mt-2 font-mono text-sm uppercase tracking-widest">
  Welcome back, Agent <span className="text-white font-bold">{user?.username}</span>
  </p>
  </div>
  <div className="flex items-center gap-4">
- <Link to={`/multiplayer/${Math.random().toString(36).substring(2, 10)}`}>
+ <Link to="/multiplayer">
  <Button variant="outline" className="gap-2">
  <Swords size={18} className="text-brand-400" />
  PVP Match

@@ -18,7 +18,7 @@ let socket = null;
  * 2. Set up event listeners
  * 3. Return socket for use in components
  */
-export const initSocket = (token, serverUrl = window.location.origin) => {
+export const initSocket = (token, serverUrl = '') => {
  if (socket) {
  return socket;
  }

@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import DebateRoom from '../models/DebateRoom.js';
+import PvPRoom from '../models/PvPRoom.js';
 import User from '../models/User.js';
 import sentimentService from '../services/sentimentService.js';
 
@@ -32,7 +33,7 @@ import sentimentService from '../services/sentimentService.js';
 export const initializeSocket = (server, options = {}) => {
   const io = new Server(server, {
     cors: {
-      origin: [/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/],
+      origin: [/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/],
       credentials: true,
     },
     ...options,
@@ -176,7 +177,7 @@ export const initializeSocket = (server, options = {}) => {
      *   ↓
      * Remaining users see "user left"
      */
-    socket.on('leaveRoom', (data) => {
+    socket.on('leaveRoom', async (data) => {
       const { roomId } = data;
       
       console.log(`📍 ${socket.userName} left room ${roomId}`);
@@ -184,6 +185,22 @@ export const initializeSocket = (server, options = {}) => {
       // Remove socket from room
       socket.leave(roomId);
       socket.currentRoom = null;
+
+      // Clean up PvPRoom if necessary
+      try {
+        const room = await PvPRoom.findOne({ roomCode: roomId });
+        if (room) {
+          room.participants = room.participants.filter(id => id.toString() !== socket.userId.toString());
+          if (room.participants.length === 0) {
+            await room.deleteOne();
+          } else {
+            if (room.status === 'active') room.status = 'waiting';
+            await room.save();
+          }
+        }
+      } catch (err) {
+        console.error('Error cleaning up PvPRoom:', err);
+      }
 
       // Notify everyone in room that user left
       io.to(roomId).emit('userLeft', {
@@ -569,6 +586,24 @@ export const initializeSocket = (server, options = {}) => {
           timestamp: new Date(),
           message: `${socket.userName} disconnected`,
         });
+
+        // Clean up PvPRoom if necessary
+        (async () => {
+          try {
+            const room = await PvPRoom.findOne({ roomCode: socket.currentRoom });
+            if (room) {
+              room.participants = room.participants.filter(id => id.toString() !== socket.userId.toString());
+              if (room.participants.length === 0) {
+                await room.deleteOne();
+              } else {
+                if (room.status === 'active') room.status = 'waiting';
+                await room.save();
+              }
+            }
+          } catch (err) {
+            console.error('Error cleaning up PvPRoom on disconnect:', err);
+          }
+        })();
       }
 
       // Broadcast user is offline
