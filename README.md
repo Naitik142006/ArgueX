@@ -73,6 +73,7 @@ Think of it as *"Chess.com meets Perplexity meets Discord."*
 
 ## 🏁 Quickstart Initialization
 
+
 ### 1. Initialize Server
 
 From the repository root, navigate to the `server/` folder:

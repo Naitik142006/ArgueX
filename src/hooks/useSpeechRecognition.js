@@ -52,6 +52,10 @@ export function useSpeechRecognition({ onFinalResult } = {}) {
 
  recognition.onerror = (event) => {
  console.error('Speech recognition error:', event.error);
+ if (event.error === 'network' || event.error === 'no-speech') {
+ setIsListening(false);
+ return;
+ }
  setError(event.error);
  setIsListening(false);
  };
