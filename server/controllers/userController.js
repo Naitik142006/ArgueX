@@ -7,7 +7,7 @@ import User from '../models/User.js';
 export const getLeaderboard = async (req, res) => {
   try {
     const topUsers = await User.find({})
-      .sort({ eloRating: -1 })
+      .sort({ eloRating: -1, wins: -1 })
       .limit(100)
       .select('username eloRating rank wins losses draws currentStreak highestStreak achievements');
 

@@ -15,7 +15,7 @@ export default function LeaderboardPage() {
  const fetchLeaderboard = async () => {
  try {
  const data = await userAPI.getLeaderboard();
- setUsers(data);
+ setUsers([...data].sort((a, b) => b.eloRating - a.eloRating));
  } catch (error) {
  console.error('Failed to load leaderboard', error);
  } finally {
