@@ -111,5 +111,35 @@ Access the arena at `http://localhost:5173`.
 
 ---
 
+## 🚢 Deployment Guide
+
+ArgueX is deployment-ready. The codebase supports deploying the frontend and backend separately for optimal performance and scalability.
+
+### 1. Backend Deployment (Render / Railway / Heroku)
+Deploy the `server` directory as a Node.js web service.
+
+**Required Environment Variables:**
+- `PORT` = `5000` (or let the host assign it)
+- `MONGO_URI` = Your MongoDB production connection string
+- `JWT_SECRET` = A strong random string for authentication
+- `AI_API_KEY` = Your Google Gemini API Key
+- `ALLOWED_ORIGIN` = The URL of your deployed frontend (e.g., `https://arguex.vercel.app`) to configure CORS safely.
+
+**Build/Start Commands:**
+- Build: `npm install`
+- Start: `npm run start:prod`
+
+### 2. Frontend Deployment (Vercel / Netlify)
+Deploy the root directory as a static Vite application.
+
+**Required Environment Variables:**
+- `VITE_API_URL` = The URL of your live backend (e.g., `https://arguex-backend.onrender.com/api`).
+
+**Build/Start Commands:**
+- Build: `npm install && npm run build`
+- Output Directory: `dist`
+
+---
+
 ## 🎨 Design Philosophy
 ArgueX abandons the "cookie-cutter Bootstrap dashboard" look. We prioritize a cinematic, immersive aesthetic. Deep dark modes (`#09090b`), sleek brand accents, smooth hover states, and a distraction-free environment make the user feel intelligent, powerful, and ready for intellectual combat without any unnecessary clutter or eye strain.
