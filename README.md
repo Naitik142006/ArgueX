@@ -36,9 +36,9 @@ Think of it as *"Chess.com meets Perplexity meets Discord."*
 
 ## 🛠️ Tech Stack & Architecture
 
-**Frontend (The Glassmorphic Arena):**
+**Frontend (The Clean Arena):**
 - React + Vite
-- Tailwind CSS (Custom Design System with Neon Accents & Glassmorphism)
+- Tailwind CSS (Custom Design System with a clean, sleek, and distraction-free interface)
 - Framer Motion (Fluid Micro-animations & Route Transitions)
 - Lucide React (Premium Iconography)
 - WebRTC & Web Speech APIs
@@ -46,7 +46,7 @@ Think of it as *"Chess.com meets Perplexity meets Discord."*
 **Backend (Mission Control Server):**
 - Node.js & Express.js
 - Socket.io (Low-latency Signaling & Live Telemetry)
-- MongoDB Atlas (Secure Combat Logs)
+- MongoDB (Secure Combat Logs)
 - Google Gemini AI (With Exponential Backoff Retry patterns)
 - JWT Authentication Guards
 
@@ -112,4 +112,4 @@ Access the arena at `http://localhost:5173`.
 ---
 
 ## 🎨 Design Philosophy
-ArgueX abandons the "cookie-cutter Bootstrap dashboard" look. We prioritize a cinematic, immersive aesthetic. Deep dark modes (`#09090b`), vibrant neon brand accents, smooth hover states, and ambient background glows make the user feel intelligent, powerful, and ready for intellectual combat.
+ArgueX abandons the "cookie-cutter Bootstrap dashboard" look. We prioritize a cinematic, immersive aesthetic. Deep dark modes (`#09090b`), sleek brand accents, smooth hover states, and a distraction-free environment make the user feel intelligent, powerful, and ready for intellectual combat without any unnecessary clutter or eye strain.

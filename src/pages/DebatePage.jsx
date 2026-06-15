@@ -44,6 +44,17 @@ function DebatePage() {
  const [threadMessage, setThreadMessage] = useState(null);
  const [analysis, setAnalysis] = useState(null);
  const [isAnalyzing, setIsAnalyzing] = useState(false);
+ const messagesEndRef = useRef(null);
+
+ const scrollToBottom = () => {
+   setTimeout(() => {
+     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+   }, 100);
+ };
+
+ useEffect(() => {
+   scrollToBottom();
+ }, [messages, isAITyping]);
 
  const { urlDebateId } = useParams();
  const { user: currentUser } = useAuth();
@@ -416,6 +427,7 @@ function DebatePage() {
  </div>
  </div>
  )}
+ <div ref={messagesEndRef} className="h-4" />
  </div>
 
  {/* Live Transcript Panel */}
