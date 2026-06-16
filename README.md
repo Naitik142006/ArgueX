@@ -147,6 +147,19 @@ Deploy the root directory as a static Vite application.
 - Build: `npm run build`
 - Output Directory: `dist`
 
+### 3. Setup Admin Dashboard (Production)
+ArgueX includes a secure admin panel for reviewing feedback. To initialize the admin account without leaking credentials in code:
+
+1. Connect to your production server environment (or locally point your `.env` to the production MongoDB).
+2. Set the following environment variables:
+   - `ADMIN_EMAIL` (e.g., your@email.com)
+   - `ADMIN_PASSWORD` (A secure password)
+3. Run the setup script:
+   ```bash
+   node server/setup_admin.js
+   ```
+This script will revoke admin rights from all other users and create/update the dedicated admin account safely. The code contains no hardcoded credentials.
+
 ---
 
 ## 🎨 Design Philosophy

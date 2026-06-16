@@ -15,7 +15,9 @@ const setupAdmin = async () => {
     console.log(`Revoked admin access from ${updateResult.modifiedCount} users.`);
     
     // 2. Check if the specific admin account already exists
-    const adminEmail = 'admin@arguex.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@arguex.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'change_this_immediately';
+    
     let adminUser = await User.findOne({ email: adminEmail });
     
     if (adminUser) {
@@ -26,7 +28,7 @@ const setupAdmin = async () => {
     } else {
       // If it doesn't exist, create it
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('admin123', salt);
+      const hashedPassword = await bcrypt.hash(adminPassword, salt);
       
       adminUser = await User.create({
         username: 'ArgueX Admin',
@@ -37,10 +39,10 @@ const setupAdmin = async () => {
       console.log('Created new dedicated Admin account.');
     }
     
-    console.log('\n--- ADMIN CREDENTIALS ---');
+    console.log('\n--- ADMIN SETUP COMPLETE ---');
     console.log(`Email: ${adminEmail}`);
-    console.log(`Password: admin123`);
-    console.log('-------------------------\n');
+    console.log('Password: [HIDDEN FOR SECURITY - Set via ADMIN_PASSWORD in .env]');
+    console.log('----------------------------\n');
 
     process.exit(0);
   } catch (error) {
