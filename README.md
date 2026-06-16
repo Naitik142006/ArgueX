@@ -4,7 +4,14 @@ ArgueX is not a generic SaaS dashboard. It is a premium, AI-powered esports plat
 
 Think of it as *"Chess.com meets Perplexity meets Discord."*
 
-![ArgueX Dashboard](https://img.shields.io/badge/Status-Active_Development-brand) ![React](https://img.shields.io/badge/React-18-blue) ![Node.js](https://img.shields.io/badge/Node.js-Backend-green) ![WebRTC](https://img.shields.io/badge/WebRTC-P2P_Mesh-orange)
+![ArgueX Dashboard](https://img.shields.io/badge/Status-Live_Production-brand) ![React](https://img.shields.io/badge/React-18-blue) ![Node.js](https://img.shields.io/badge/Node.js-Backend-green) ![WebRTC](https://img.shields.io/badge/WebRTC-P2P_Mesh-orange)
+
+## 🌐 Live Demo
+
+ArgueX is deployed and live!
+
+- **Frontend Application**: [https://argue-x.vercel.app](https://argue-x.vercel.app)
+- **Backend API**: [https://arguex-backend.onrender.com](https://arguex-backend.onrender.com)
 
 ---
 
@@ -134,9 +141,10 @@ Deploy the root directory as a static Vite application.
 
 **Required Environment Variables:**
 - `VITE_API_URL` = The URL of your live backend (e.g., `https://arguex-backend.onrender.com/api`).
+- `VITE_SOCKET_URL` = The base URL of your live backend (e.g., `https://arguex-backend.onrender.com`).
 
 **Build/Start Commands:**
-- Build: `npm install && npm run build`
+- Build: `npm run build`
 - Output Directory: `dist`
 
 ---
