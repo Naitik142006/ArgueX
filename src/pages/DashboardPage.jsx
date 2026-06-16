@@ -43,6 +43,18 @@ export default function DashboardPage() {
  { label:'Global Rank', value: analytics?.rank ||'Unranked', icon: Trophy, color:'text-rank-gold', shadow:'' },
  ];
 
+ const getRankProgress = (elo = 1000) => {
+    if (elo < 1100) return { current: 'Bronze', next: 'Silver', progress: (Math.max(0, elo) / 1100) * 100 };
+    if (elo < 1300) return { current: 'Silver', next: 'Gold', progress: ((elo - 1100) / 200) * 100 };
+    if (elo < 1500) return { current: 'Gold', next: 'Platinum', progress: ((elo - 1300) / 200) * 100 };
+    if (elo < 1700) return { current: 'Platinum', next: 'Diamond', progress: ((elo - 1500) / 200) * 100 };
+    if (elo < 2000) return { current: 'Diamond', next: 'Master', progress: ((elo - 1700) / 300) * 100 };
+    if (elo < 2400) return { current: 'Master', next: 'Grandmaster', progress: ((elo - 2000) / 400) * 100 };
+    return { current: 'Grandmaster', next: 'Max Rank', progress: 100 };
+  };
+
+  const rankData = getRankProgress(analytics?.eloRating);
+
  return (
  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 animate-fade-in relative">
  {/* Background ambient glow */}
@@ -193,11 +205,13 @@ export default function DashboardPage() {
  <h3 className="text-lg font-heading font-bold text-white mb-2 uppercase">Pro League</h3>
  <p className="text-sm text-zinc-400 mb-6">Unlock Grandmaster rank to access exclusive tournaments and prize pools.</p>
  <div className="w-full bg-surface rounded-full h-2 mb-2 border border-white/5 overflow-hidden">
- <div className="bg-gradient-to-r from-brand-500 to-neon-cyan h-full rounded-full" style={{ width:'45%' }}></div>
+ <div className="bg-gradient-to-r from-brand-500 to-neon-cyan h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, Math.max(0, rankData.progress))}%` }}></div>
  </div>
  <div className="flex justify-between text-xs font-mono text-zinc-500">
- <span>Gold II</span>
- <span className="text-brand-400">45% to Master</span>
+ <span>{rankData.current} ({analytics?.eloRating || 1000})</span>
+ <span className="text-brand-400">
+ {rankData.current === 'Grandmaster' ? 'Max Rank Reached' : `${Math.round(rankData.progress)}% to ${rankData.next}`}
+ </span>
  </div>
  </div>
  </div>
