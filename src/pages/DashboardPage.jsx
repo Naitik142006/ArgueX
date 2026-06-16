@@ -188,10 +188,11 @@ export default function DashboardPage() {
  Trending Scenarios
  </h3>
  <div className="space-y-3">
- {["Is AI conscious?","Universal Basic Income","Space Exploration vs Earth","Social Media Regulation"
+ {["Is AI conscious?", "Universal Basic Income", "Space Exploration vs Earth", "Social Media Regulation"
  ].map((topic, i) => (
  <button
  key={i}
+ onClick={() => navigate('/debate', { state: { initialTopic: topic } })}
  className="w-full text-left p-4 rounded-xl bg-surface border border-white/5 hover:border-brand-500/30 hover:bg-white/5 transition-all duration-300 group flex items-center justify-between"
  >
  <span className="text-sm font-medium text-zinc-300 group-hover:text-white">{topic}</span>

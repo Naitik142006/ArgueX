@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from'react';
-import { useParams } from'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import { Swords, Zap, Mic, MicOff, Activity, ShieldAlert, Target, BrainCircuit } from'lucide-react';
 import { createDebateRequest, addDebateMessageRequest, requestAIReply } from'../services/debateService.js';
 import { debateAPI, aiAPI } from'../services/api.js';
@@ -33,7 +33,8 @@ function normalizeMessage(raw, index) {
 }
 
 function DebatePage() {
- const [topic, setTopic] = useState('AI in education');
+ const location = useLocation();
+ const [topic, setTopic] = useState(location.state?.initialTopic || 'AI in education');
  const [messages, setMessages] = useState([]);
  const [draft, setDraft] = useState('');
  const [error, setError] = useState('');
