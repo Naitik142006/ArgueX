@@ -44,6 +44,7 @@ function DebatePage() {
  const [threadMessage, setThreadMessage] = useState(null);
  const [analysis, setAnalysis] = useState(null);
  const [isAnalyzing, setIsAnalyzing] = useState(false);
+ const [isSending, setIsSending] = useState(false);
  const messagesEndRef = useRef(null);
 
  const scrollToBottom = () => {
@@ -79,7 +80,7 @@ function DebatePage() {
  }, [isListening, transcript, resetTranscript]);
 
  const token = window.localStorage.getItem('token');
- const { socket, isConnected } = useSocket(token);
+ const { socket, isConnected, isReconnecting } = useSocket(token);
 
  useEffect(() => {
  if (urlDebateId) {
@@ -207,6 +208,7 @@ function DebatePage() {
  try {
  setError('');
  setStatus('Sending message...');
+ setIsSending(true);
 
  let currentDebateId = debateId;
 
@@ -237,6 +239,8 @@ function DebatePage() {
  } catch (err) {
  setError(err.message);
  setStatus('');
+ } finally {
+ setIsSending(false);
  }
  };
 
@@ -314,6 +318,10 @@ function DebatePage() {
  {isConnected ? (
  <Badge variant="brand" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 py-0 text-[10px]">
  <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SECURE LINK</span>
+ </Badge>
+ ) : isReconnecting ? (
+ <Badge variant="brand" className="bg-amber-500/10 text-amber-400 border-amber-500/20 py-0 text-[10px]">
+ <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> RECONNECTING...</span>
  </Badge>
  ) : (
  <Badge variant="outline" className="text-zinc-500 border-zinc-700 py-0 text-[10px]">OFFLINE</Badge>
@@ -469,7 +477,7 @@ function DebatePage() {
  )}
  <Button
  onClick={handleSend}
- disabled={isAITyping || (!draft.trim() && !transcript)}
+ disabled={isAITyping || isSending || (!draft.trim() && !transcript)}
  variant="brand"
  className="h-[56px] px-8 shrink-0 rounded-2xl font-heading font-bold tracking-wide uppercase"
  >

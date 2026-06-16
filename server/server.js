@@ -10,10 +10,17 @@ import roomRoutes from './routes/roomRoutes.js';
 import pvpRoutes from './routes/pvpRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import feedbackRoutes from './routes/feedbackRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { initializeSocket } from './socket/socket.js';
 
 dotenv.config();
+
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET is not defined.');
+  process.exit(1);
+}
+
 console.info('Environment loaded:', {
   AI_API_KEY: !!process.env.AI_API_KEY,
   PORT: process.env.PORT || 5000,
@@ -40,6 +47,7 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/pvp', pvpRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

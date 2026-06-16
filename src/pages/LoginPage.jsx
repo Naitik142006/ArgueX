@@ -31,11 +31,17 @@ export default function LoginPage() {
  try {
  setIsLoading(true);
  setError('');
- await login({
+ const data = await login({
  email: form.email.trim().toLowerCase(),
  password: form.password,
  });
+ // Redirect admin users directly to the admin dashboard
+ const loggedInUser = data?.user || data;
+ if (loggedInUser?.isAdmin) {
+ navigate('/admin/feedback');
+ } else {
  navigate('/dashboard');
+ }
  } catch (err) {
  if (err.status === 401) setError('Invalid credentials detected.');
  else setError(err.message ||'Authentication sequence failed.');
@@ -140,8 +146,9 @@ export default function LoginPage() {
  size="lg"
  className="w-full font-heading font-bold tracking-widest text-sm"
  loading={isLoading}
+ disabled={isLoading}
  >
- LOGIN
+ {isLoading ? 'SIGNING IN...' : 'LOGIN'}
  </Button>
  </div>
  </form>

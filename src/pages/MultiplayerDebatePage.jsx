@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Video, Mic, MicOff, VideoOff, Copy, Check, Users, BrainCircuit, Activity, ShieldAlert, LogIn, Swords, Loader2 } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Copy, Check, Users, BrainCircuit, Activity, ShieldAlert, LogIn, Swords, Loader2, Send, MessageSquare } from 'lucide-react';
 import { useSocket } from '../hooks/useSocket.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useMediaStream } from '../hooks/useMediaStream.js';
@@ -31,15 +31,16 @@ export default function MultiplayerDebatePage() {
   const chatScrollRef = useRef(null);
   const [isJudging, setIsJudging] = useState(false);
   const [evaluation, setEvaluation] = useState(null);
+  const [textInput, setTextInput] = useState('');
 
   const localVideoRef = useRef(null);
 
   // Get socket connection
   const token = window.localStorage.getItem('token');
-  const { socket, isConnected } = useSocket(token);
+  const { socket, isConnected, isReconnecting } = useSocket(token);
 
   // Local media stream
-  const { stream: localStream, toggleVideo, toggleAudio, isLoading: isMediaLoading } = useMediaStream(true, true);
+  const { stream: localStream, toggleVideo, toggleAudio, isLoading: isMediaLoading, error: mediaError } = useMediaStream(true, true);
 
   const [isVideoMuted, setIsVideoMuted] = useState(false);
   const [isAudioMuted, setIsAudioMuted] = useState(false);
@@ -57,7 +58,7 @@ export default function MultiplayerDebatePage() {
         });
         const data = await res.json();
         if (data.success) {
-          setRoomId(data.room.roomCode);
+          setRoomId(data.room.roomId);
         }
       } catch (err) {
         console.error("Failed to create PvP room:", err);
@@ -80,7 +81,7 @@ export default function MultiplayerDebatePage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ roomCode: joinCodeInput.trim() })
+        body: JSON.stringify({ roomId: joinCodeInput.trim() })
       });
       const data = await res.json();
       if (data.success) {
@@ -89,7 +90,7 @@ export default function MultiplayerDebatePage() {
           socket.emit('leaveRoom', { roomId });
         }
         // Transition to new room
-        setRoomId(data.room.roomCode);
+        setRoomId(data.room.roomId);
         setIsLobby(false);
       } else {
         setJoinError(data.message || 'Failed to join room');
@@ -107,6 +108,13 @@ export default function MultiplayerDebatePage() {
       socket.emit('multiplayer-message', { roomId, text });
     }
   }, [socket, roomId, isLobby]);
+
+  const handleSendText = useCallback(() => {
+    const trimmed = textInput.trim();
+    if (!trimmed || !socket || isLobby) return;
+    socket.emit('multiplayer-message', { roomId, text: trimmed });
+    setTextInput('');
+  }, [textInput, socket, roomId, isLobby]);
 
   const { startListening, stopListening, interimTranscript, hasSupport } = useSpeechRecognition({
     onFinalResult: handleFinalSpeech
@@ -205,6 +213,15 @@ export default function MultiplayerDebatePage() {
     };
   }, [socket, roomId, localStream, userId, handleRemoteStream, isMediaLoading]);
 
+  // Cleanup on unmount or roomId change
+  useEffect(() => {
+    return () => {
+      if (socket && roomId) {
+        socket.emit('leaveRoom', { roomId });
+      }
+    };
+  }, [socket, roomId]);
+
   const copyInviteLink = () => {
     if (!roomId) return;
     navigator.clipboard.writeText(roomId);
@@ -233,7 +250,7 @@ export default function MultiplayerDebatePage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ roomCode: roomId })
+        body: JSON.stringify({ roomId: roomId })
       });
     } catch (e) {}
     navigate('/dashboard');
@@ -287,9 +304,22 @@ export default function MultiplayerDebatePage() {
             </span>
           </Badge>
           {!isLobby && (
-            <span className="font-mono text-zinc-400 text-sm font-semibold tracking-widest flex items-center gap-2 uppercase">
-              <Users size={16} className="text-neon-violet" /> {totalParticipants} LINKED
-            </span>
+            <>
+              {isConnected ? (
+                <Badge variant="brand" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 py-0 text-[10px]">
+                  <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> SECURE LINK</span>
+                </Badge>
+              ) : isReconnecting ? (
+                <Badge variant="brand" className="bg-amber-500/10 text-amber-400 border-amber-500/20 py-0 text-[10px]">
+                  <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> RECONNECTING...</span>
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-zinc-500 border-zinc-700 py-0 text-[10px]">OFFLINE</Badge>
+              )}
+              <span className="font-mono text-zinc-400 text-sm font-semibold tracking-widest flex items-center gap-2 uppercase">
+                <Users size={16} className="text-neon-violet" /> {totalParticipants} LINKED
+              </span>
+            </>
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -321,8 +351,9 @@ export default function MultiplayerDebatePage() {
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex justify-center my-8">
+                    <div className="flex flex-col items-center justify-center my-8 gap-3">
                       <Loader2 className="animate-spin text-brand-400" size={32} />
+                      <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest animate-pulse">Creating debate room...</p>
                     </div>
                   )}
                   <p className="text-xs text-zinc-500 font-mono uppercase">Room auto-closes after 1 hour</p>
@@ -345,7 +376,7 @@ export default function MultiplayerDebatePage() {
                       maxLength={8}
                     />
                     <Button variant="neon" className="px-6 gap-2" onClick={handleJoinRoom} disabled={isJoining || !joinCodeInput.trim()}>
-                      {isJoining ? <Loader2 className="animate-spin" size={18} /> : <Swords size={18} />} Join
+                      {isJoining ? <><Loader2 className="animate-spin" size={18} /> JOINING ROOM...</> : <><Swords size={18} /> Join</>}
                     </Button>
                   </div>
                   {joinError && <p className="text-rose-400 text-xs font-mono mt-3">{joinError}</p>}
@@ -355,9 +386,20 @@ export default function MultiplayerDebatePage() {
           ) : (
             <>
               {/* Local User */}
-              <div className="flex-1 rounded-3xl overflow-hidden relative glass-panel border-white/10 shadow-glass min-h-[300px] group">
+              <div className="flex-1 rounded-3xl overflow-hidden relative glass-panel border-white/10 shadow-glass min-h-[300px] group bg-black/50 flex flex-col items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent z-10 pointer-events-none"></div>
-                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-[1.02]" />
+                {mediaError ? (
+                  <div className="relative z-20 text-center p-6 animate-fade-in">
+                    <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-500/20">
+                      <ShieldAlert size={32} className="text-rose-400" />
+                    </div>
+                    <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider mb-2">Hardware Access Denied</h3>
+                    <p className="text-sm font-mono text-zinc-400 max-w-sm mx-auto leading-relaxed">{mediaError}</p>
+                    <p className="text-xs font-mono text-amber-500 mt-4 uppercase tracking-widest">You can still debate using text.</p>
+                  </div>
+                ) : (
+                  <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-[1.02] absolute inset-0" />
+                )}
                 {(!localStream || isVideoMuted) && (
                   <div className="absolute inset-0 flex items-center justify-center bg-surface z-10">
                     <div className="w-24 h-24 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl font-heading font-bold text-zinc-600 shadow-glass">
@@ -413,9 +455,9 @@ export default function MultiplayerDebatePage() {
             <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-hide smooth-scroll" ref={chatScrollRef}>
               {chatMessages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
-                  <Mic size={32} className="text-zinc-600 mb-4" />
-                  <p className="text-zinc-500 font-mono text-sm uppercase tracking-widest">Voice feed inactive.</p>
-                  <p className="text-zinc-600 text-xs mt-2">Speech will be transcribed here.</p>
+                  <MessageSquare size={32} className="text-zinc-600 mb-4" />
+                  <p className="text-zinc-500 font-mono text-sm uppercase tracking-widest">No messages yet.</p>
+                  <p className="text-zinc-600 text-xs mt-2">{hasSupport ? 'Speak or type below to debate.' : 'Type below to start debating.'}</p>
                 </div>
               ) : (
                 chatMessages.map((msg, idx) => (
@@ -427,6 +469,27 @@ export default function MultiplayerDebatePage() {
                   </div>
                 ))
               )}
+            </div>
+
+            {/* Text Input for debate messages */}
+            <div className="px-4 pt-3 pb-2 border-t border-white/5">
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendText()}
+                  placeholder={mediaError ? 'Type your argument...' : 'Type to debate...'}
+                  className="flex-1 bg-background border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm font-mono placeholder:text-zinc-600 focus:outline-none focus:border-brand-500/50 focus:ring-1 focus:ring-brand-500/30 transition-all"
+                />
+                <button
+                  onClick={handleSendText}
+                  disabled={!textInput.trim()}
+                  className="p-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors shrink-0"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 border-t border-white/10 bg-surface/80 backdrop-blur-xl">

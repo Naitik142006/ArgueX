@@ -12,9 +12,12 @@ import DebateRoom from'./components/DebateRoom.jsx';
 import LeaderboardPage from'./pages/LeaderboardPage.jsx';
 import MultiplayerDebatePage from'./pages/MultiplayerDebatePage.jsx';
 import ReplayPage from'./pages/ReplayPage.jsx';
+import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
+import ErrorBoundary from'./components/ErrorBoundary.jsx';
 
 function App() {
  return (
+ <ErrorBoundary>
  <Routes>
  <Route path="/" element={<Layout />}>
  <Route index element={<PublicRoute><LandingPage /></PublicRoute>} />
@@ -85,8 +88,17 @@ function App() {
  </ProtectedRoute>
  }
  />
+  <Route
+  path="admin/feedback"
+  element={
+  <ProtectedRoute adminOnly={true}>
+  <AdminDashboardPage />
+  </ProtectedRoute>
+  }
+  />
  </Route>
  </Routes>
+ </ErrorBoundary>
  );
 }
 

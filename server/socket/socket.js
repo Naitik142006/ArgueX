@@ -33,7 +33,7 @@ import sentimentService from '../services/sentimentService.js';
 export const initializeSocket = (server, options = {}) => {
   const io = new Server(server, {
     cors: {
-      origin: [/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/],
+      origin: process.env.ALLOWED_ORIGIN || [/^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/],
       credentials: true,
     },
     ...options,
@@ -63,7 +63,7 @@ export const initializeSocket = (server, options = {}) => {
       }
 
       // Verify JWT token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
       // Fetch user from DB
       const user = await User.findById(decoded.id);
@@ -188,7 +188,7 @@ export const initializeSocket = (server, options = {}) => {
 
       // Clean up PvPRoom if necessary
       try {
-        const room = await PvPRoom.findOne({ roomCode: roomId });
+        const room = await PvPRoom.findOne({ roomId: roomId });
         if (room) {
           room.participants = room.participants.filter(id => id.toString() !== socket.userId.toString());
           if (room.participants.length === 0) {
@@ -590,7 +590,7 @@ export const initializeSocket = (server, options = {}) => {
         // Clean up PvPRoom if necessary
         (async () => {
           try {
-            const room = await PvPRoom.findOne({ roomCode: socket.currentRoom });
+            const room = await PvPRoom.findOne({ roomId: socket.currentRoom });
             if (room) {
               room.participants = room.participants.filter(id => id.toString() !== socket.userId.toString());
               if (room.participants.length === 0) {

@@ -18,7 +18,7 @@ let socket = null;
  * 2. Set up event listeners
  * 3. Return socket for use in components
  */
-export const initSocket = (token, serverUrl = '') => {
+export const initSocket = (token, serverUrl = import.meta.env.VITE_SOCKET_URL || '') => {
  if (socket) {
  return socket;
  }
@@ -33,6 +33,7 @@ export const initSocket = (token, serverUrl = '') => {
  reconnectionDelay: 1000,
  reconnectionDelayMax: 5000,
  reconnectionAttempts: 5,
+ transports: ['websocket', 'polling'], // prefer websocket for low latency
  });
 
  /**

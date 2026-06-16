@@ -5,7 +5,7 @@ import crypto from 'crypto';
 /**
  * Generate a short 6-8 char uppercase alphanumeric code
  */
-const generateRoomCode = () => {
+const generateRoomId = () => {
   return crypto.randomBytes(4).toString('hex').toUpperCase().substring(0, 7);
 };
 
@@ -17,20 +17,20 @@ const generateRoomCode = () => {
 export const createRoom = asyncHandler(async (req, res) => {
   const userId = req.user.id;
   
-  let roomCode;
+  let roomId;
   let isUnique = false;
   
   // Ensure uniqueness
   while (!isUnique) {
-    roomCode = generateRoomCode();
-    const existing = await PvPRoom.findOne({ roomCode });
+    roomId = generateRoomId();
+    const existing = await PvPRoom.findOne({ roomId });
     if (!existing) {
       isUnique = true;
     }
   }
 
   const room = await PvPRoom.create({
-    roomCode,
+    roomId,
     hostId: userId,
     participants: [userId],
     status: 'waiting',
@@ -48,14 +48,14 @@ export const createRoom = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const joinRoom = asyncHandler(async (req, res) => {
-  const { roomCode } = req.body;
+  const { roomId } = req.body;
   const userId = req.user.id;
 
-  if (!roomCode) {
+  if (!roomId) {
     return res.status(400).json({ message: 'Room code is required' });
   }
 
-  const room = await PvPRoom.findOne({ roomCode: roomCode.toUpperCase() });
+  const room = await PvPRoom.findOne({ roomId: roomId.toUpperCase() });
 
   if (!room) {
     return res.status(404).json({ message: 'Room not found or has expired' });
@@ -94,14 +94,14 @@ export const joinRoom = asyncHandler(async (req, res) => {
  * @access  Private
  */
 export const leaveRoom = asyncHandler(async (req, res) => {
-  const { roomCode } = req.body;
+  const { roomId } = req.body;
   const userId = req.user.id;
 
-  if (!roomCode) {
+  if (!roomId) {
     return res.status(400).json({ message: 'Room code is required' });
   }
 
-  const room = await PvPRoom.findOne({ roomCode: roomCode.toUpperCase() });
+  const room = await PvPRoom.findOne({ roomId: roomId.toUpperCase() });
 
   if (!room) {
     return res.status(404).json({ message: 'Room not found' });

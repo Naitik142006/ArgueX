@@ -39,26 +39,30 @@ export const generateReply = async (req, res) => {
   const lastMessage = debate.messages[debate.messages.length - 1];
   
   // Call AI Service
-  const aiResponseText = await aiService.generateDebateResponse(
-    debate.messages,
-    debate.aiPersona || 'coach',
-    debate.topic,
-    lastMessage.text
-  );
+  try {
+    const aiResponseText = await aiService.generateDebateResponse(
+      debate.messages,
+      debate.aiPersona || 'coach',
+      debate.topic,
+      lastMessage.text
+    );
 
-  // Add AI response to the database
-  const finalSender = (!debate.aiPersona || debate.aiPersona === 'coach' || debate.aiPersona === 'einstein') 
-    ? 'ArgueX AI Coach' 
-    : debate.aiPersona;
+    // Add AI response to the database
+    const finalSender = (!debate.aiPersona || debate.aiPersona === 'coach' || debate.aiPersona === 'einstein') 
+      ? 'ArgueX AI Coach' 
+      : debate.aiPersona;
 
-  debate.messages.push({
-    sender: finalSender,
-    text: aiResponseText
-  });
+    debate.messages.push({
+      sender: finalSender,
+      text: aiResponseText
+    });
 
-  await debate.save();
-
-  res.json(debate);
+    await debate.save();
+    res.json(debate);
+  } catch (error) {
+    console.error('AI Service Error in generateReply:', error);
+    res.status(503).json({ message: 'AI analysis is temporarily unavailable. Please try again later.' });
+  }
 };
 
 /**
@@ -80,7 +84,13 @@ export const analyzeDebate = async (req, res) => {
 
   // Call the AI Service to evaluate
   // We expect evaluateDebate to return a structured JSON object
-  const analysis = await aiService.evaluateDebate(debate.messages);
+  let analysis;
+  try {
+    analysis = await aiService.evaluateDebate(debate.messages);
+  } catch (error) {
+    console.error('AI Service Error in analyzeDebate:', error);
+    return res.status(503).json({ message: 'AI analysis is temporarily unavailable. Please try again later.' });
+  }
 
   const user = await User.findById(req.user._id);
   let eloChange = 0;
@@ -128,6 +138,11 @@ export const analyzeDebate = async (req, res) => {
  */
 export const getTopics = async (req, res) => {
   const { category } = req.body;
-  const topics = await aiService.generateTopics(category || 'General');
-  res.json({ topics });
+  try {
+    const topics = await aiService.generateTopics(category || 'General');
+    res.json({ topics });
+  } catch (error) {
+    console.error('AI Service Error in getTopics:', error);
+    res.status(503).json({ message: 'AI analysis is temporarily unavailable. Please try again later.' });
+  }
 };

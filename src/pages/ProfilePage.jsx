@@ -1,19 +1,38 @@
-import { useAuth } from'../context/AuthContext.jsx';
-import { motion } from'framer-motion';
-import { Calendar, Trophy, Swords, Medal, Star, Target, BrainCircuit, Activity, ShieldAlert, Crosshair } from'lucide-react';
-import Card from'../components/ui/Card.jsx';
-import Avatar from'../components/ui/Avatar.jsx';
-import Badge from'../components/ui/Badge.jsx';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
+import { motion } from 'framer-motion';
+import { Calendar, Trophy, Swords, Medal, Star, Target, BrainCircuit, Activity, ShieldAlert, Crosshair } from 'lucide-react';
+import Card from '../components/ui/Card.jsx';
+import Avatar from '../components/ui/Avatar.jsx';
+import Badge from '../components/ui/Badge.jsx';
+import { userAPI } from '../services/api.js';
+import { SkeletonCard } from '../components/ui/Skeleton.jsx';
 
 export default function ProfilePage() {
- const { user } = useAuth();
+  const { user } = useAuth();
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
 
- const stats = [
- { label:'Battles Fought', value: 28, icon: Swords, color:'text-brand-400', bg:'bg-brand-500/10', border:'border-brand-500/20', glow:'' },
- { label:'Victories', value: 18, icon: Trophy, color:'text-yellow-400', bg:'bg-yellow-500/10', border:'border-yellow-500/20', glow:'' },
- { label:'Defeats', value: 8, icon: Target, color:'text-rose-400', bg:'bg-rose-500/10', border:'border-rose-500/20', glow:'' },
- { label:'Accolades', value: 6, icon: Medal, color:'text-neon-violet', bg:'bg-neon-violet/10', border:'border-neon-violet/20', glow:'' },
- ];
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const data = await userAPI.getAnalytics();
+        setAnalytics(data);
+      } catch (error) {
+        console.error('Failed to load profile analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+
+  const stats = [
+    { label: 'Battles Fought', value: analytics?.totalDebates || 0, icon: Swords, color: 'text-brand-400', bg: 'bg-brand-500/10', border: 'border-brand-500/20', glow: '' },
+    { label: 'Victories', value: analytics?.wins || 0, icon: Trophy, color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', glow: '' },
+    { label: 'Defeats', value: analytics?.losses || 0, icon: Target, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', glow: '' },
+    { label: 'Win Rate', value: `${analytics?.winRate || 0}%`, icon: Activity, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', glow: '' },
+  ];
 
  const containerVariants = {
  hidden: { opacity: 0 },
@@ -76,13 +95,16 @@ export default function ProfilePage() {
  <div className="hidden lg:flex flex-col items-end justify-center mb-2">
  <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Current Rating</span>
  <div className="text-4xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600">
- 1452
+ {analytics?.eloRating || 1000}
  </div>
  </div>
  </div>
  </Card>
  </motion.div>
 
+ {loading ? (
+  <div className="mb-8"><SkeletonCard /></div>
+ ) : (
  <motion.div variants={containerVariants}
  initial="hidden"
  animate="visible"
@@ -100,6 +122,7 @@ export default function ProfilePage() {
  </motion.div>
  ))}
  </motion.div>
+ )}
 
  <div className="grid lg:grid-cols-2 gap-6 relative z-10">
  <motion.div
@@ -121,13 +144,13 @@ export default function ProfilePage() {
  <div>
  <div className="flex justify-between items-end mb-3">
  <span className="font-mono text-xs font-semibold text-zinc-400 uppercase tracking-widest flex items-center gap-2"><Target size={14}/> Win Rate</span>
- <span className="font-heading font-bold text-emerald-400 text-lg">69%</span>
+ <span className="font-heading font-bold text-emerald-400 text-lg">{analytics?.winRate || 0}%</span>
  </div>
  <div className="h-3 w-full bg-surface border border-white/5 rounded-full overflow-hidden flex shadow-inner relative">
- <div className="h-full bg-emerald-500 w-[69%] relative">
+ <div className="h-full bg-emerald-500 relative" style={{ width: `${analytics?.winRate || 0}%` }}>
  <div className="absolute inset-0 bg-white/20 w-full"></div>
  </div>
- <div className="h-full bg-rose-500 w-[31%] opacity-50" />
+ <div className="h-full bg-rose-500 opacity-50" style={{ width: `${100 - (analytics?.winRate || 0)}%` }} />
  </div>
  </div>
 
@@ -144,11 +167,11 @@ export default function ProfilePage() {
  </div>
  <div className="pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
  <div className="bg-surface border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
- <span className="text-2xl font-heading font-bold text-white">42</span>
+ <span className="text-2xl font-heading font-bold text-white">{analytics?.wins || 0}</span>
  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">Perfect Arguments</span>
  </div>
  <div className="bg-surface border border-white/5 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
- <span className="text-2xl font-heading font-bold text-white">12</span>
+ <span className="text-2xl font-heading font-bold text-white">{analytics?.losses || 0}</span>
  <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mt-1">Fallacies Detected</span>
  </div>
  </div>

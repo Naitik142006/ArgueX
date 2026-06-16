@@ -18,6 +18,7 @@ import { initSocket, getSocket, emitEvent, listenEvent } from'../services/socket
 export const useSocket = (token) => {
  const socketRef = useRef(null);
  const [isConnected, setIsConnected] = useState(false);
+ const [isReconnecting, setIsReconnecting] = useState(false);
  const [onlineUsers, setOnlineUsers] = useState([]);
  const [roomUsers, setRoomUsers] = useState([]);
 
@@ -30,12 +31,20 @@ export const useSocket = (token) => {
  socketRef.current.on('connect', () => {
  console.log('✓ Socket connected');
  setIsConnected(true);
+ setIsReconnecting(false);
  });
 
  socketRef.current.on('disconnect', () => {
  console.log('✗ Socket disconnected');
  setIsConnected(false);
  });
+
+ // Listen to manager for reconnection
+ if (socketRef.current.io) {
+ socketRef.current.io.on('reconnect_attempt', () => {
+ setIsReconnecting(true);
+ });
+ }
 
  // Track online users
  socketRef.current.on('userOnline', (data) => {
@@ -141,6 +150,7 @@ export const useSocket = (token) => {
  return {
  socket: socketRef.current,
  isConnected,
+ isReconnecting,
  onlineUsers,
  roomUsers,
  joinRoom,

@@ -28,19 +28,21 @@ import { useAuth } from'../context/AuthContext.jsx';
  * - If logged in: The protected component
  * - If not logged in: Redirect to /login
  */
-function ProtectedRoute({ children }) {
+/**
+ * ProtectedRoute Component
+ * Props:
+ * - children: The component to protect
+ * - adminOnly: if true, only admins can access; non-admins get redirect to /dashboard
+ * Returns:
+ * - If loading: Loading spinner
+ * - If not logged in: Redirect to /login
+ * - If adminOnly and not admin: Redirect to /dashboard
+ * - If admin and NOT adminOnly route: Redirect to /admin/feedback
+ * - Otherwise: The protected component
+ */
+function ProtectedRoute({ children, adminOnly = false }) {
  const { isLoggedIn, isLoading, user } = useAuth();
 
- // ============================================================
- // LOADING STATE
- // ============================================================
- /**
- * While checking if user is logged in, show spinner
- * * Why?
- * - App might be checking token with backend
- * - Don't want to flash login page then dashboard
- * - User sees loading screen instead
- */
  if (isLoading) {
  return (
  <div className="flex items-center justify-center min-h-screen bg-slate-950">
@@ -52,35 +54,20 @@ function ProtectedRoute({ children }) {
  );
  }
 
- // ============================================================
- // NOT LOGGED IN - REDIRECT TO LOGIN
- // ============================================================
-
- /**
- * If user is NOT logged in, redirect to login page
- * * The user will:
- * 1. Try to access /dashboard
- * 2. We check: isLoggedIn = false
- * 3. Redirect to /login
- * 4. User sees login form
- * 5. User logs in
- * 6. Token stored in localStorage
- * 7. User can now access /dashboard
- */
  if (!isLoggedIn || !user) {
- // Redirect to login, but remember where user was trying to go
- // (using'state' - not used yet but good practice)
  return <Navigate to="/login" replace />;
  }
 
- // ============================================================
- // LOGGED IN - SHOW PROTECTED COMPONENT
- // ============================================================
+ // Admin visiting a normal user route → send to admin dashboard
+ if (user.isAdmin && !adminOnly) {
+ return <Navigate to="/admin/feedback" replace />;
+ }
 
- /**
- * User is logged in and token is valid
- * Show the protected component (dashboard, profile, etc.)
- */
+ // Non-admin visiting an admin-only route → send to dashboard
+ if (adminOnly && !user.isAdmin) {
+ return <Navigate to="/dashboard" replace />;
+ }
+
  return children;
 }
 

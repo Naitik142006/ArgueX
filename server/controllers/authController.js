@@ -60,6 +60,7 @@ export const login = async (req, res) => {
       username: user.username,
       email: user.email,
       rank: user.rank,
+      isAdmin: user.isAdmin,
       token: generateToken(user._id),
     });
   } else {
@@ -79,6 +80,7 @@ export const getProfile = async (req, res) => {
     username: req.user.username,
     email: req.user.email,
     rank: req.user.rank,
+    isAdmin: req.user.isAdmin,
     createdAt: req.user.createdAt,
   });
 };

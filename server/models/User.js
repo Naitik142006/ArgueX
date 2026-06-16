@@ -24,7 +24,7 @@ const userSchema = mongoose.Schema(
     },
     eloRating: {
       type: Number,
-      default: 1200,
+      default: 1000,
     },
     wins: { type: Number, default: 0 },
     losses: { type: Number, default: 0 },
@@ -37,6 +37,10 @@ const userSchema = mongoose.Schema(
       unlockedAt: { type: Date, default: Date.now },
       icon: String
     }],
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

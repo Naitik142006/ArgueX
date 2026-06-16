@@ -133,6 +133,6 @@ export const evaluateGroup = async (req, res) => {
     res.json(evaluation);
   } catch (error) {
     console.error('evaluateGroup error:', error);
-    res.status(500).json({ message: 'Failed to evaluate group debate' });
+    res.status(503).json({ message: 'AI analysis is temporarily unavailable. Please try again later.' });
   }
 };

@@ -187,8 +187,9 @@ export default function SignupPage() {
  size="lg"
  className="w-full font-heading font-bold tracking-widest text-sm"
  loading={isLoading}
+ disabled={isLoading}
  >
- SIGN UP
+ {isLoading ? 'CREATING ACCOUNT...' : 'SIGN UP'}
  </Button>
  </div>
  </form>

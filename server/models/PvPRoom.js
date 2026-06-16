@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const pvpRoomSchema = mongoose.Schema(
   {
-    roomCode: {
+    roomId: {
       type: String,
       unique: true,
       required: true,
